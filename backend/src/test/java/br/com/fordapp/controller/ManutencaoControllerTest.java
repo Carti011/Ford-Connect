@@ -37,7 +37,7 @@ class ManutencaoControllerTest {
 
     @Test
     void deveRetornar401QuandoSemAutenticacao() throws Exception {
-        mockMvc.perform(get("/api/veiculos/" + UUID.randomUUID() + "/maintenance"))
+        mockMvc.perform(get("/api/veiculos/" + UUID.randomUUID() + "/manutencoes"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -54,7 +54,7 @@ class ManutencaoControllerTest {
 
         when(manutencaoService.buscarPorVeiculo(veiculoId)).thenReturn(List.of(r));
 
-        mockMvc.perform(get("/api/veiculos/" + veiculoId + "/maintenance"))
+        mockMvc.perform(get("/api/veiculos/" + veiculoId + "/manutencoes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].tipo").value("Revisão de 40.000 km"))
                 .andExpect(jsonPath("$[0].custo").value(1750.00));
@@ -66,7 +66,7 @@ class ManutencaoControllerTest {
         UUID veiculoId = UUID.randomUUID();
         when(manutencaoService.buscarPorVeiculo(veiculoId)).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/veiculos/" + veiculoId + "/maintenance"))
+        mockMvc.perform(get("/api/veiculos/" + veiculoId + "/manutencoes"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
     }

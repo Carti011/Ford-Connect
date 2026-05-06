@@ -62,18 +62,18 @@ public class SecurityConfig {
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
+        CorsConfiguration configuracaoCors = new CorsConfiguration();
+        configuracaoCors.setAllowedOrigins(List.of(
                 "http://localhost:8081",
                 "exp://localhost:8081"
         ));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        config.setAllowCredentials(true);
+        configuracaoCors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuracaoCors.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuracaoCors.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
+        UrlBasedCorsConfigurationSource fonte = new UrlBasedCorsConfigurationSource();
+        fonte.registerCorsConfiguration("/**", configuracaoCors);
+        return fonte;
     }
 
     @Bean

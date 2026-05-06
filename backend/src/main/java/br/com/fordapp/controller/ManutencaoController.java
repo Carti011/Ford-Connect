@@ -18,7 +18,7 @@ public class ManutencaoController {
         this.manutencaoService = manutencaoService;
     }
 
-    @GetMapping("/{id}/maintenance")
+    @GetMapping("/{id}/manutencoes")
     ResponseEntity<List<RegistroManutencaoResponse>> buscarHistorico(@PathVariable UUID id) {
         return ResponseEntity.ok(manutencaoService.buscarPorVeiculo(id));
     }

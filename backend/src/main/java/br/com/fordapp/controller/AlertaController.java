@@ -18,7 +18,7 @@ public class AlertaController {
         this.alertaService = alertaService;
     }
 
-    @GetMapping("/{id}/alerts")
+    @GetMapping("/{id}/alertas")
     ResponseEntity<List<AlertaRevisaoResponse>> buscarAlertas(@PathVariable UUID id) {
         return ResponseEntity.ok(alertaService.buscarPendentesPorVeiculo(id));
     }
