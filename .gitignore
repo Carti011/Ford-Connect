@@ -1,0 +1,11 @@
+
+# variáveis de ambiente
+.env
+.env.local
+.env.*.local
+
+# sistema
+.DS_Store
+CLAUDE.md
+docs/handoff/
+Thumbs.db

@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    platform: linux/arm64
+    container_name: ford_app_db
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-ford_mobile}
+      POSTGRES_USER: ${PGUSER:-ford}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-ford123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-ford} -d ${PGDATABASE:-ford_mobile}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    platform: linux/arm64
+    container_name: ford_app_backend
+    environment:
+      PGHOST: postgres
+      PGDATABASE: ${PGDATABASE:-ford_mobile}
+      PGUSER: ${PGUSER:-ford}
+      PGPASSWORD: ${PGPASSWORD:-ford123}
+      PGSSLMODE: disable
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
