@@ -12,7 +12,7 @@ Foram consideradas duas abordagens: sessões com estado no servidor (stateful) e
 
 ## Decisão
 
-Usar **JWT (JSON Web Token)** com assinatura **HS256** gerenciado pelo **Spring Security**. A biblioteca utilizada é `io.jsonwebtoken:jjwt` (versão 0.12.3). O único endpoint público é `POST /api/auth/login` — todos os demais exigem token válido no header `Authorization: Bearer <token>`.
+Usar **JWT (JSON Web Token)** com assinatura **HS256** gerenciado pelo **Spring Security**. A biblioteca utilizada é `io.jsonwebtoken:jjwt` (versão 0.12.3). O único endpoint público é `POST /api/autenticacao/login` — todos os demais exigem token válido no header `Authorization: Bearer <token>`.
 
 ## Consequências
 
