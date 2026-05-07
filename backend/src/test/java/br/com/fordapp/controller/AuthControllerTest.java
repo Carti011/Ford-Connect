@@ -43,8 +43,9 @@ class AuthControllerTest {
 
     @Test
     void deveRetornar200ComTokenQuandoLoginValido() throws Exception {
+        java.util.UUID veiculoId = java.util.UUID.fromString("22222222-2222-2222-2222-222222222222");
         LoginRequest request = new LoginRequest("joao@fordconnect.com", "ford@123");
-        LoginResponse response = new LoginResponse("token.jwt", "Bearer", System.currentTimeMillis());
+        LoginResponse response = new LoginResponse("token.jwt", "Bearer", System.currentTimeMillis(), veiculoId);
 
         when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
@@ -53,7 +54,8 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("token.jwt"))
-                .andExpect(jsonPath("$.tipo").value("Bearer"));
+                .andExpect(jsonPath("$.tipo").value("Bearer"))
+                .andExpect(jsonPath("$.veiculoId").value("22222222-2222-2222-2222-222222222222"));
     }
 
     @Test
