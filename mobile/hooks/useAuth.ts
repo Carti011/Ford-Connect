@@ -12,8 +12,13 @@ export function useAuth() {
     async function verificarSessao() {
       const token = await obterToken();
       const veiculoId = await obterVeiculoId();
-      setEstaAutenticado(token !== null);
-      setIdVeiculo(veiculoId);
+      if (token && !veiculoId) {
+        await limparSessao();
+        setEstaAutenticado(false);
+      } else {
+        setEstaAutenticado(token !== null);
+        setIdVeiculo(veiculoId);
+      }
       setCarregando(false);
     }
     verificarSessao();

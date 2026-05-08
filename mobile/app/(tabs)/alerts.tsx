@@ -14,7 +14,10 @@ export default function TelaAlertas() {
   const [erro, setErro] = useState<string | null>(null);
 
   const carregar = useCallback(async () => {
-    if (!idVeiculo) return;
+    if (!idVeiculo) {
+      setCarregando(false);
+      return;
+    }
     setCarregando(true);
     setErro(null);
     try {
