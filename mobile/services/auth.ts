@@ -6,7 +6,9 @@ export async function login(email: string, senha: string): Promise<string> {
   const resposta = await api.post<RespostaLogin>('/api/autenticacao/login', { email, senha });
   const { token, veiculoId } = resposta.data;
   await SecureStore.setItemAsync(CHAVE_TOKEN, token);
-  await SecureStore.setItemAsync(CHAVE_VEICULO_ID, veiculoId);
+  if (veiculoId) {
+    await SecureStore.setItemAsync(CHAVE_VEICULO_ID, veiculoId);
+  }
   return token;
 }
 
