@@ -4,6 +4,9 @@
 .env.local
 .env.*.local
 
+# scripts de desenvolvimento local
+backend/dev.sh
+
 # sistema
 .DS_Store
 CLAUDE.md
