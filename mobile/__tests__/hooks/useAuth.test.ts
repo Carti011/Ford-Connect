@@ -1,7 +1,6 @@
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-native';
-import { useAuth } from '../../hooks/useAuth';
-
-const mockReplace = jest.fn();
+import { useAuth, AuthProvider } from '../../hooks/useAuth';
 
 jest.mock('../../services/auth', () => ({
   obterToken: jest.fn(),
@@ -10,12 +9,11 @@ jest.mock('../../services/auth', () => ({
   limparSessao: jest.fn(),
 }));
 
-jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockReplace }),
-}));
-
 import * as authService from '../../services/auth';
 const authMock = authService as jest.Mocked<typeof authService>;
+
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(AuthProvider, null, children);
 
 describe('useAuth', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -24,7 +22,7 @@ describe('useAuth', () => {
     authMock.obterToken.mockResolvedValueOnce(null);
     authMock.obterVeiculoId.mockResolvedValueOnce(null);
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -35,7 +33,7 @@ describe('useAuth', () => {
     authMock.obterToken.mockResolvedValueOnce('jwt-valido');
     authMock.obterVeiculoId.mockResolvedValueOnce('22222222-2222-2222-2222-222222222222');
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -46,7 +44,7 @@ describe('useAuth', () => {
     authMock.obterToken.mockResolvedValueOnce(null);
     authMock.obterVeiculoId.mockResolvedValueOnce(null);
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     expect(result.current.carregando).toBe(true);
 
@@ -59,7 +57,7 @@ describe('useAuth', () => {
     authMock.obterToken.mockResolvedValueOnce('jwt-valido');
     authMock.obterVeiculoId.mockResolvedValueOnce('22222222-2222-2222-2222-222222222222');
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -71,7 +69,7 @@ describe('useAuth', () => {
     authMock.obterVeiculoId.mockResolvedValueOnce(null);
     authMock.login.mockResolvedValueOnce('novo-token');
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
     await act(async () => {});
 
     await act(async () => {
@@ -80,7 +78,6 @@ describe('useAuth', () => {
 
     expect(authMock.login).toHaveBeenCalledWith('joao@fordconnect.com', 'ford@123');
     expect(result.current.estaAutenticado).toBe(true);
-    expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
   });
 
   it('sair() chama limparSessao e atualiza estaAutenticado para false', async () => {
@@ -88,7 +85,7 @@ describe('useAuth', () => {
     authMock.obterVeiculoId.mockResolvedValueOnce('22222222-2222-2222-2222-222222222222');
     authMock.limparSessao.mockResolvedValueOnce(undefined);
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper });
     await act(async () => {});
 
     await act(async () => {
@@ -97,6 +94,5 @@ describe('useAuth', () => {
 
     expect(authMock.limparSessao).toHaveBeenCalled();
     expect(result.current.estaAutenticado).toBe(false);
-    expect(mockReplace).toHaveBeenCalledWith('/login');
   });
 });

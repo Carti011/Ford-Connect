@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { useAuth } from '../hooks/useAuth';
+import { AuthProvider, useAuth } from '../hooks/useAuth';
 
-export default function RootLayout() {
+function NavigationGuard() {
   const { estaAutenticado, carregando } = useAuth();
   const router = useRouter();
   const segments = useSegments();
@@ -33,5 +33,13 @@ export default function RootLayout() {
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <NavigationGuard />
+    </AuthProvider>
   );
 }
