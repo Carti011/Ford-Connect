@@ -119,3 +119,40 @@ export function BellIcon({ size = 18, color = '#fff' }: P) {
     </Svg>
   );
 }
+
+export function GaugeIcon({ size = 24, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M5.6 15.4a8 8 0 1 1 12.8 0" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+      <Path d="M12 12l-3-3" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+      <Circle cx="12" cy="12" r="1.5" fill={color}/>
+    </Svg>
+  );
+}
+
+export function ClockIcon({ size = 24, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="8.5" stroke={color} strokeWidth="1.6"/>
+      <Path d="M12 8v4l2.5 2.5" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
+
+export function OilIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 13c0-2 4-7 7-9 3 2 7 7 7 9a7 7 0 1 1-14 0z" stroke={color} strokeWidth="1.6" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
+
+export function WiperIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 19c4-10 12-10 16 0" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+      <Path d="M12 19V8" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+      <Circle cx="12" cy="6" r="1.5" fill={color}/>
+    </Svg>
+  );
+}

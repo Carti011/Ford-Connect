@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { buscarVeiculo } from '../../services/veiculo';
 import { VehicleHero } from '../../components/VehicleHero';
@@ -35,6 +36,7 @@ const AGENDAMENTOS_INICIAL = [
 ];
 
 export default function TelaHome() {
+  const router = useRouter();
   const { idVeiculo, sair } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -84,9 +86,14 @@ export default function TelaHome() {
         {/* top chrome */}
         <SafeAreaView edges={['top']} style={estilos.topChrome}>
           <Image source={require('../../assets/images/logo-ford.png')} style={estilos.logo} />
-          <Pressable onPress={sair} style={estilos.avatarBtn}>
-            <UserIcon size={20} color={colors.text} />
-          </Pressable>
+          <View style={estilos.topChromeDir}>
+            <Pressable onPress={() => router.push('/alerts')} style={estilos.avatarBtn}>
+              <BellIcon size={20} color={colors.text} />
+            </Pressable>
+            <Pressable onPress={sair} style={estilos.avatarBtn}>
+              <UserIcon size={20} color={colors.text} />
+            </Pressable>
+          </View>
         </SafeAreaView>
 
         {/* status header */}
@@ -235,6 +242,10 @@ const estilos = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  topChromeDir: {
+    flexDirection: 'row',
+    gap: spacing[2],
   },
   avatarBtn: {
     width: 42,

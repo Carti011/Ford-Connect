@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, ScrollView, Pressable,
-  ActivityIndicator, StyleSheet,
+  ActivityIndicator, StyleSheet, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -139,6 +139,11 @@ export default function TelaAlertas() {
         showsVerticalScrollIndicator={false}
       >
         <SafeAreaView edges={['top']}>
+          {/* top chrome */}
+          <View style={estilos.topChrome}>
+            <Image source={require('../../assets/images/logo-ford.png')} style={estilos.logo} />
+          </View>
+
           {/* header */}
           <View style={estilos.header}>
             <Text style={estilos.subtitulo}>{subtitulo}</Text>
@@ -208,6 +213,19 @@ const estilos = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
+  },
+
+  // top chrome
+  topChrome: {
+    paddingHorizontal: spacing[5],
+    paddingTop: spacing[3],
+  },
+  logo: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
 
   // header

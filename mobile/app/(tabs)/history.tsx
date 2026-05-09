@@ -5,10 +5,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { buscarManutencoes } from '../../services/manutencao';
 import { buscarVeiculo } from '../../services/veiculo';
-import { UserIcon } from '../../components/icons';
+import { BellIcon } from '../../components/icons';
 import { RegistroManutencao, Veiculo } from '../../types';
 import { colors } from '../../constants/colors';
 import { typography } from '../../constants/typography';
@@ -58,7 +59,8 @@ function CardManutencao({ item }: { item: RegistroManutencao }) {
 }
 
 export default function TelaHistorico() {
-  const { idVeiculo, sair } = useAuth();
+  const router = useRouter();
+  const { idVeiculo } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
   const [manutencoes, setManutencoes] = useState<RegistroManutencao[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -115,8 +117,8 @@ export default function TelaHistorico() {
         {/* top chrome */}
         <SafeAreaView edges={['top']} style={estilos.topChrome}>
           <Image source={require('../../assets/images/logo-ford.png')} style={estilos.logo} />
-          <Pressable onPress={sair} style={estilos.avatarBtn}>
-            <UserIcon size={20} color={colors.text} />
+          <Pressable onPress={() => router.push('/alerts')} style={estilos.avatarBtn}>
+            <BellIcon size={20} color={colors.text} />
           </Pressable>
         </SafeAreaView>
 

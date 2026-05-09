@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet } from 'react-native';
-import { VehicleIcon, BoltIcon, WrenchIcon } from '../../components/icons';
+import { VehicleIcon, GaugeIcon, ClockIcon } from '../../components/icons';
 import { colors } from '../../constants/colors';
 import { layout } from '../../constants/layout';
 
@@ -30,16 +30,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="alerts"
+        name="vitals"
         options={{
-          tabBarIcon: ({ color }) => <BoltIcon size={22} color={color} />,
+          tabBarIcon: ({ color }) => <GaugeIcon size={22} color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
-          tabBarIcon: ({ color }) => <WrenchIcon size={22} color={color} />,
+          tabBarIcon: ({ color }) => <ClockIcon size={22} color={color} />,
         }}
+      />
+      <Tabs.Screen
+        name="alerts"
+        options={{ href: null }}
       />
     </Tabs>
   );
