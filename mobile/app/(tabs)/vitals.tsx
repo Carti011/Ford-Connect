@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, ScrollView, Pressable,
-  ActivityIndicator, StyleSheet, Image,
+  ActivityIndicator, StyleSheet, Image, useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import Svg, { Rect, Path, Line, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
+import Svg, { Line } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { buscarVeiculo } from '../../services/veiculo';
@@ -27,38 +27,99 @@ const VITALS = {
   fluidoLimpador: 'Boa',
 };
 
-function TruckTopView() {
-  return (
-    <Svg width={100} height={196} viewBox="0 0 100 196">
-      <Defs>
-        <LinearGradient id="ttd" x1="0" y1="0" x2="1" y2="0">
-          <Stop offset="0" stopColor="#1F2A3A" />
-          <Stop offset="0.5" stopColor="#2A3648" />
-          <Stop offset="1" stopColor="#1F2A3A" />
-        </LinearGradient>
-      </Defs>
-      {/* corpo */}
-      <Rect x="0" y="8" width="100" height="180" rx="14" fill="url(#ttd)" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-      {/* para-brisa frontal */}
-      <Path d="M 8 36 L 92 36 L 86 64 L 14 64 Z" fill="rgba(0,0,0,0.45)" />
-      {/* teto cabine */}
-      <Rect x="14" y="64" width="72" height="34" fill="rgba(255,255,255,0.04)" />
-      {/* vidro traseiro cabine */}
-      <Path d="M 14 98 L 86 98 L 92 108 L 8 108 Z" fill="rgba(0,0,0,0.4)" />
-      {/* caçamba */}
-      <Rect x="6" y="108" width="88" height="74" rx="3" fill="rgba(0,0,0,0.25)" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-      {/* divisórias caçamba */}
-      <Line x1="10" y1="128" x2="90" y2="128" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-      <Line x1="10" y1="148" x2="90" y2="148" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-      <Line x1="10" y1="168" x2="90" y2="168" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-    </Svg>
-  );
-}
+// dimensões originais da imagem ranger-topo.webp
+const IMG_NATURAL_W = 467;
+const IMG_NATURAL_H = 879;
 
-function BadgePressao({ valor, estilo }: { valor: number; estilo: object }) {
+// posições dos pneus na imagem original (x%, y% do centro de cada pneu)
+const PNEU = {
+  dtEsq:  { x: 0.14, y: 0.24 }, // dianteiro esquerdo
+  dtDir:  { x: 0.86, y: 0.24 }, // dianteiro direito
+  trEsq:  { x: 0.14, y: 0.77 }, // traseiro esquerdo
+  trDir:  { x: 0.86, y: 0.77 }, // traseiro direito
+};
+
+function VistaTopCaminhao({ pressaoDianteira, pressaoTraseira }: {
+  pressaoDianteira: number;
+  pressaoTraseira: number;
+}) {
+  const { width: screenWidth } = useWindowDimensions();
+
+  const containerW = screenWidth - spacing[6] * 2;
+  // imagem é exibida com largura fixa para sobrar espaço nas laterais para os badges
+  const imgW = Math.round(containerW * 0.50);
+  const imgH = Math.round(imgW * IMG_NATURAL_H / IMG_NATURAL_W);
+  const containerH = imgH + spacing[4]; // leve padding vertical
+  const imgLeft = Math.round((containerW - imgW) / 2);
+
+  // coordenadas dos pneus no espaço do container
+  const pneu = {
+    dtEsq:  { x: imgLeft + imgW * PNEU.dtEsq.x,  y: Math.round(imgH * PNEU.dtEsq.y)  },
+    dtDir:  { x: imgLeft + imgW * PNEU.dtDir.x,  y: Math.round(imgH * PNEU.dtDir.y)  },
+    trEsq:  { x: imgLeft + imgW * PNEU.trEsq.x,  y: Math.round(imgH * PNEU.trEsq.y)  },
+    trDir:  { x: imgLeft + imgW * PNEU.trDir.x,  y: Math.round(imgH * PNEU.trDir.y)  },
+  };
+
+  // tamanho aproximado do badge (para calcular centro)
+  const bW = 48;
+  const bH = 28;
+  const bGap = 10; // distância da borda do container
+
+  // centros dos badges
+  const badge = {
+    dtEsq:  { x: bGap + bW / 2,                    y: pneu.dtEsq.y  },
+    dtDir:  { x: containerW - bGap - bW / 2,        y: pneu.dtDir.y  },
+    trEsq:  { x: bGap + bW / 2,                     y: pneu.trEsq.y  },
+    trDir:  { x: containerW - bGap - bW / 2,         y: pneu.trDir.y  },
+  };
+
+  const badgeStyle = (cx: number, cy: number) => ({
+    position: 'absolute' as const,
+    left: cx - bW / 2,
+    top:  cy - bH / 2,
+    width: bW,
+    height: bH,
+  });
+
   return (
-    <View style={[estilos.badgePressao, estilo]}>
-      <Text style={estilos.badgePressaoTexto}>{valor}</Text>
+    <View style={{ width: containerW, height: containerH }}>
+      {/* imagem do carro */}
+      <Image
+        source={require('../../assets/images/ranger-topo.webp')}
+        style={{ position: 'absolute', left: imgLeft, top: 0, width: imgW, height: imgH }}
+        resizeMode="contain"
+      />
+
+      {/* overlay SVG com linhas */}
+      <Svg
+        width={containerW}
+        height={containerH}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      >
+        <Line x1={badge.dtEsq.x} y1={badge.dtEsq.y} x2={pneu.dtEsq.x} y2={pneu.dtEsq.y}
+          stroke={colors.ok} strokeWidth={1} opacity={0.55} />
+        <Line x1={badge.dtDir.x} y1={badge.dtDir.y} x2={pneu.dtDir.x} y2={pneu.dtDir.y}
+          stroke={colors.ok} strokeWidth={1} opacity={0.55} />
+        <Line x1={badge.trEsq.x} y1={badge.trEsq.y} x2={pneu.trEsq.x} y2={pneu.trEsq.y}
+          stroke={colors.ok} strokeWidth={1} opacity={0.55} />
+        <Line x1={badge.trDir.x} y1={badge.trDir.y} x2={pneu.trDir.x} y2={pneu.trDir.y}
+          stroke={colors.ok} strokeWidth={1} opacity={0.55} />
+      </Svg>
+
+      {/* badges de pressão */}
+      <View style={[estilos.badgePressao, badgeStyle(badge.dtEsq.x, badge.dtEsq.y)]}>
+        <Text style={estilos.badgeTexto}>{pressaoDianteira}</Text>
+      </View>
+      <View style={[estilos.badgePressao, badgeStyle(badge.dtDir.x, badge.dtDir.y)]}>
+        <Text style={estilos.badgeTexto}>{pressaoDianteira}</Text>
+      </View>
+      <View style={[estilos.badgePressao, badgeStyle(badge.trEsq.x, badge.trEsq.y)]}>
+        <Text style={estilos.badgeTexto}>{pressaoTraseira}</Text>
+      </View>
+      <View style={[estilos.badgePressao, badgeStyle(badge.trDir.x, badge.trDir.y)]}>
+        <Text style={estilos.badgeTexto}>{pressaoTraseira}</Text>
+      </View>
     </View>
   );
 }
@@ -167,21 +228,18 @@ export default function TelaVitais() {
           </Pressable>
         )}
 
-        {/* vista top do caminhão com badges de pressão */}
-        <View style={estilos.truckContainer}>
-          <View style={estilos.truckSvgWrapper}>
-            <TruckTopView />
-          </View>
-          <BadgePressao valor={VITALS.pressaoDianteira} estilo={estilos.badgeTopEsq} />
-          <BadgePressao valor={VITALS.pressaoDianteira} estilo={estilos.badgeTopDir} />
-          <BadgePressao valor={VITALS.pressaoTraseira} estilo={estilos.badgeBotEsq} />
-          <BadgePressao valor={VITALS.pressaoTraseira} estilo={estilos.badgeBotDir} />
+        {/* vista top com badges de pressão e linhas */}
+        <View style={estilos.truckSecao}>
+          <VistaTopCaminhao
+            pressaoDianteira={VITALS.pressaoDianteira}
+            pressaoTraseira={VITALS.pressaoTraseira}
+          />
         </View>
 
         {/* legenda pressão */}
         <Text style={estilos.pressaoLegenda}>
           {'Pressão ideal dos pneus frios:\n'}
-          <Text style={estilos.pressaoLegendaDestaque}>
+          <Text style={estilos.pressaoDestaque}>
             {`Dianteira ${VITALS.pressaoDianteira} · Traseira ${VITALS.pressaoTraseira}`}
           </Text>
         </Text>
@@ -300,41 +358,27 @@ const estilos = StyleSheet.create({
     letterSpacing: -0.4,
   },
 
-  // truck top
-  truckContainer: {
-    position: 'relative',
-    height: 220,
-    marginHorizontal: spacing[6],
+  // seção truck
+  truckSecao: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing[2],
-  },
-  truckSvgWrapper: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: spacing[3],
   },
 
-  // badges de pressão
+  // badge de pressão
   badgePressao: {
-    position: 'absolute',
-    paddingHorizontal: spacing[3],
-    paddingVertical: 5,
     borderRadius: radius.sm,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.ok,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  badgePressaoTexto: {
+  badgeTexto: {
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
     fontFamily: 'Inter_600SemiBold',
     color: colors.ok,
   },
-  badgeTopEsq: { top: 24, left: 20 },
-  badgeTopDir: { top: 24, right: 20 },
-  badgeBotEsq: { bottom: 24, left: 20 },
-  badgeBotDir: { bottom: 24, right: 20 },
 
   // legenda pressão
   pressaoLegenda: {
@@ -346,7 +390,7 @@ const estilos = StyleSheet.create({
     marginHorizontal: spacing[6],
     marginBottom: spacing[5],
   },
-  pressaoLegendaDestaque: {
+  pressaoDestaque: {
     color: colors.text,
     fontWeight: typography.weight.semibold,
     fontFamily: 'Inter_600SemiBold',
