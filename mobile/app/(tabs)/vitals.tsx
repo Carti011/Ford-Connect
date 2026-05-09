@@ -1,82 +1,102 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  View, Text, ScrollView, Pressable,
-  ActivityIndicator, StyleSheet, Image, useWindowDimensions,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import Svg, { Line } from 'react-native-svg';
-import { useRouter } from 'expo-router';
-import { useAuth } from '../../hooks/useAuth';
-import { buscarVeiculo } from '../../services/veiculo';
-import { buscarAlertas } from '../../services/alerta';
-import { BellIcon, CaretIcon, OilIcon, WiperIcon } from '../../components/icons';
-import { Veiculo } from '../../types';
-import { colors } from '../../constants/colors';
-import { typography } from '../../constants/typography';
-import { spacing } from '../../constants/spacing';
-import { radius } from '../../constants/radius';
-import { layout } from '../../constants/layout';
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+  StyleSheet,
+  Image,
+  useWindowDimensions,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import Svg, { Line } from "react-native-svg";
+import { useRouter } from "expo-router";
+import { useAuth } from "../../hooks/useAuth";
+import { buscarVeiculo } from "../../services/veiculo";
+import { buscarAlertas } from "../../services/alerta";
+import {
+  BellIcon,
+  CaretIcon,
+  OilIcon,
+  WiperIcon,
+} from "../../components/icons";
+import { Veiculo } from "../../types";
+import { colors } from "../../constants/colors";
+import { typography } from "../../constants/typography";
+import { spacing } from "../../constants/spacing";
+import { radius } from "../../constants/radius";
+import { layout } from "../../constants/layout";
 
-// dados placeholder — backend não expõe vitals na Sprint 1
 const VITALS = {
   pressaoDianteira: 32,
   pressaoTraseira: 32,
   vidaUtilOleo: 90,
   autonomiaOleo: 300,
-  fluidoLimpador: 'Boa',
+  fluidoLimpador: "Boa",
 };
 
-// dimensões originais da imagem ranger-topo.webp
 const IMG_NATURAL_W = 467;
 const IMG_NATURAL_H = 879;
 
-// posições dos pneus na imagem original (x%, y% do centro de cada pneu)
 const PNEU = {
-  dtEsq:  { x: 0.14, y: 0.24 }, // dianteiro esquerdo
-  dtDir:  { x: 0.86, y: 0.24 }, // dianteiro direito
-  trEsq:  { x: 0.14, y: 0.77 }, // traseiro esquerdo
-  trDir:  { x: 0.86, y: 0.77 }, // traseiro direito
+  dtEsq: { x: 0.14, y: 0.2 },
+  dtDir: { x: 0.86, y: 0.2 },
+  trEsq: { x: 0.14, y: 0.7 },
+  trDir: { x: 0.86, y: 0.7 },
 };
 
-function VistaTopCaminhao({ pressaoDianteira, pressaoTraseira }: {
+function VistaTopCaminhao({
+  pressaoDianteira,
+  pressaoTraseira,
+}: {
   pressaoDianteira: number;
   pressaoTraseira: number;
 }) {
   const { width: screenWidth } = useWindowDimensions();
 
   const containerW = screenWidth - spacing[6] * 2;
-  // imagem é exibida com largura fixa para sobrar espaço nas laterais para os badges
-  const imgW = Math.round(containerW * 0.50);
-  const imgH = Math.round(imgW * IMG_NATURAL_H / IMG_NATURAL_W);
-  const containerH = imgH + spacing[4]; // leve padding vertical
+
+  const imgW = Math.round(containerW * 0.5);
+  const imgH = Math.round((imgW * IMG_NATURAL_H) / IMG_NATURAL_W);
+  const containerH = imgH + spacing[4];
   const imgLeft = Math.round((containerW - imgW) / 2);
 
-  // coordenadas dos pneus no espaço do container
   const pneu = {
-    dtEsq:  { x: imgLeft + imgW * PNEU.dtEsq.x,  y: Math.round(imgH * PNEU.dtEsq.y)  },
-    dtDir:  { x: imgLeft + imgW * PNEU.dtDir.x,  y: Math.round(imgH * PNEU.dtDir.y)  },
-    trEsq:  { x: imgLeft + imgW * PNEU.trEsq.x,  y: Math.round(imgH * PNEU.trEsq.y)  },
-    trDir:  { x: imgLeft + imgW * PNEU.trDir.x,  y: Math.round(imgH * PNEU.trDir.y)  },
+    dtEsq: {
+      x: imgLeft + imgW * PNEU.dtEsq.x,
+      y: Math.round(imgH * PNEU.dtEsq.y),
+    },
+    dtDir: {
+      x: imgLeft + imgW * PNEU.dtDir.x,
+      y: Math.round(imgH * PNEU.dtDir.y),
+    },
+    trEsq: {
+      x: imgLeft + imgW * PNEU.trEsq.x,
+      y: Math.round(imgH * PNEU.trEsq.y),
+    },
+    trDir: {
+      x: imgLeft + imgW * PNEU.trDir.x,
+      y: Math.round(imgH * PNEU.trDir.y),
+    },
   };
 
-  // tamanho aproximado do badge (para calcular centro)
   const bW = 48;
   const bH = 28;
-  const bGap = 10; // distância da borda do container
+  const bGap = 10;
 
-  // centros dos badges
   const badge = {
-    dtEsq:  { x: bGap + bW / 2,                    y: pneu.dtEsq.y  },
-    dtDir:  { x: containerW - bGap - bW / 2,        y: pneu.dtDir.y  },
-    trEsq:  { x: bGap + bW / 2,                     y: pneu.trEsq.y  },
-    trDir:  { x: containerW - bGap - bW / 2,         y: pneu.trDir.y  },
+    dtEsq: { x: bGap + bW / 2, y: pneu.dtEsq.y },
+    dtDir: { x: containerW - bGap - bW / 2, y: pneu.dtDir.y },
+    trEsq: { x: bGap + bW / 2, y: pneu.trEsq.y },
+    trDir: { x: containerW - bGap - bW / 2, y: pneu.trDir.y },
   };
 
   const badgeStyle = (cx: number, cy: number) => ({
-    position: 'absolute' as const,
+    position: "absolute" as const,
     left: cx - bW / 2,
-    top:  cy - bH / 2,
+    top: cy - bH / 2,
     width: bW,
     height: bH,
   });
@@ -85,8 +105,14 @@ function VistaTopCaminhao({ pressaoDianteira, pressaoTraseira }: {
     <View style={{ width: containerW, height: containerH }}>
       {/* imagem do carro */}
       <Image
-        source={require('../../assets/images/ranger-topo.webp')}
-        style={{ position: 'absolute', left: imgLeft, top: 0, width: imgW, height: imgH }}
+        source={require("../../assets/images/ranger-topo.webp")}
+        style={{
+          position: "absolute",
+          left: imgLeft,
+          top: 0,
+          width: imgW,
+          height: imgH,
+        }}
         resizeMode="contain"
       />
 
@@ -97,27 +123,62 @@ function VistaTopCaminhao({ pressaoDianteira, pressaoTraseira }: {
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
       >
-        <Line x1={badge.dtEsq.x} y1={badge.dtEsq.y} x2={pneu.dtEsq.x} y2={pneu.dtEsq.y}
-          stroke={colors.ok} strokeWidth={1} opacity={0.55} />
-        <Line x1={badge.dtDir.x} y1={badge.dtDir.y} x2={pneu.dtDir.x} y2={pneu.dtDir.y}
-          stroke={colors.ok} strokeWidth={1} opacity={0.55} />
-        <Line x1={badge.trEsq.x} y1={badge.trEsq.y} x2={pneu.trEsq.x} y2={pneu.trEsq.y}
-          stroke={colors.ok} strokeWidth={1} opacity={0.55} />
-        <Line x1={badge.trDir.x} y1={badge.trDir.y} x2={pneu.trDir.x} y2={pneu.trDir.y}
-          stroke={colors.ok} strokeWidth={1} opacity={0.55} />
+        <Line
+          x1={badge.dtEsq.x}
+          y1={badge.dtEsq.y}
+          x2={pneu.dtEsq.x}
+          y2={pneu.dtEsq.y}
+          stroke={colors.ok}
+          strokeWidth={1}
+          opacity={0.55}
+        />
+        <Line
+          x1={badge.dtDir.x}
+          y1={badge.dtDir.y}
+          x2={pneu.dtDir.x}
+          y2={pneu.dtDir.y}
+          stroke={colors.ok}
+          strokeWidth={1}
+          opacity={0.55}
+        />
+        <Line
+          x1={badge.trEsq.x}
+          y1={badge.trEsq.y}
+          x2={pneu.trEsq.x}
+          y2={pneu.trEsq.y}
+          stroke={colors.ok}
+          strokeWidth={1}
+          opacity={0.55}
+        />
+        <Line
+          x1={badge.trDir.x}
+          y1={badge.trDir.y}
+          x2={pneu.trDir.x}
+          y2={pneu.trDir.y}
+          stroke={colors.ok}
+          strokeWidth={1}
+          opacity={0.55}
+        />
       </Svg>
 
-      {/* badges de pressão */}
-      <View style={[estilos.badgePressao, badgeStyle(badge.dtEsq.x, badge.dtEsq.y)]}>
+      <View
+        style={[estilos.badgePressao, badgeStyle(badge.dtEsq.x, badge.dtEsq.y)]}
+      >
         <Text style={estilos.badgeTexto}>{pressaoDianteira}</Text>
       </View>
-      <View style={[estilos.badgePressao, badgeStyle(badge.dtDir.x, badge.dtDir.y)]}>
+      <View
+        style={[estilos.badgePressao, badgeStyle(badge.dtDir.x, badge.dtDir.y)]}
+      >
         <Text style={estilos.badgeTexto}>{pressaoDianteira}</Text>
       </View>
-      <View style={[estilos.badgePressao, badgeStyle(badge.trEsq.x, badge.trEsq.y)]}>
+      <View
+        style={[estilos.badgePressao, badgeStyle(badge.trEsq.x, badge.trEsq.y)]}
+      >
         <Text style={estilos.badgeTexto}>{pressaoTraseira}</Text>
       </View>
-      <View style={[estilos.badgePressao, badgeStyle(badge.trDir.x, badge.trDir.y)]}>
+      <View
+        style={[estilos.badgePressao, badgeStyle(badge.trDir.x, badge.trDir.y)]}
+      >
         <Text style={estilos.badgeTexto}>{pressaoTraseira}</Text>
       </View>
     </View>
@@ -125,7 +186,10 @@ function VistaTopCaminhao({ pressaoDianteira, pressaoTraseira }: {
 }
 
 function CardVital({
-  icone, pct, label, sub,
+  icone,
+  pct,
+  label,
+  sub,
 }: {
   icone: React.ReactNode;
   pct?: string;
@@ -153,7 +217,10 @@ export default function TelaVitais() {
   const [erro, setErro] = useState<string | null>(null);
 
   const carregar = useCallback(async () => {
-    if (!idVeiculo) { setCarregando(false); return; }
+    if (!idVeiculo) {
+      setCarregando(false);
+      return;
+    }
     setCarregando(true);
     setErro(null);
     try {
@@ -164,15 +231,19 @@ export default function TelaVitais() {
       setVeiculo(veiculoDados);
       setTotalAlertas(alertasDados.length);
     } catch (e: any) {
-      setErro(e?.response?.status === 401
-        ? 'Sessão expirada. Faça login novamente.'
-        : 'Não foi possível carregar os dados.');
+      setErro(
+        e?.response?.status === 401
+          ? "Sessão expirada. Faça login novamente."
+          : "Não foi possível carregar os dados.",
+      );
     } finally {
       setCarregando(false);
     }
   }, [idVeiculo]);
 
-  useEffect(() => { carregar(); }, [carregar]);
+  useEffect(() => {
+    carregar();
+  }, [carregar]);
 
   if (carregando) {
     return (
@@ -182,16 +253,17 @@ export default function TelaVitais() {
     );
   }
 
-  const modeloTexto = veiculo ? `${veiculo.marca} ${veiculo.modelo}` : '—';
+  const modeloTexto = veiculo ? `${veiculo.marca} ${veiculo.modelo}` : "—";
   const kmFormatado = veiculo?.quilometragem
-    ? veiculo.quilometragem.toLocaleString('pt-BR')
-    : '—';
+    ? veiculo.quilometragem.toLocaleString("pt-BR")
+    : "—";
 
-  const tituloAlerta = totalAlertas === 0
-    ? 'Nenhum alerta\nativo'
-    : totalAlertas === 1
-      ? '1 alerta\nativo'
-      : `${totalAlertas} alertas\nativos`;
+  const tituloAlerta =
+    totalAlertas === 0
+      ? "Nenhum alerta\nativo"
+      : totalAlertas === 1
+        ? "1 alerta\nativo"
+        : `${totalAlertas} alertas\nativos`;
 
   return (
     <View style={estilos.tela}>
@@ -200,10 +272,15 @@ export default function TelaVitais() {
         contentContainerStyle={estilos.scroll}
         showsVerticalScrollIndicator={false}
       >
-        {/* top chrome */}
-        <SafeAreaView edges={['top']} style={estilos.topChrome}>
-          <Image source={require('../../assets/images/logo-ford.png')} style={estilos.logo} />
-          <Pressable onPress={() => router.push('/alerts')} style={estilos.avatarBtn}>
+        <SafeAreaView edges={["top"]} style={estilos.topChrome}>
+          <Image
+            source={require("../../assets/images/logo-ford.png")}
+            style={estilos.logo}
+          />
+          <Pressable
+            onPress={() => router.push("/alerts")}
+            style={estilos.avatarBtn}
+          >
             <BellIcon size={20} color={colors.text} />
           </Pressable>
         </SafeAreaView>
@@ -238,7 +315,7 @@ export default function TelaVitais() {
 
         {/* legenda pressão */}
         <Text style={estilos.pressaoLegenda}>
-          {'Pressão ideal dos pneus frios:\n'}
+          {"Pressão ideal dos pneus frios:\n"}
           <Text style={estilos.pressaoDestaque}>
             {`Dianteira ${VITALS.pressaoDianteira} · Traseira ${VITALS.pressaoTraseira}`}
           </Text>
@@ -261,9 +338,14 @@ export default function TelaVitais() {
 
         {/* programação da manutenção */}
         <View style={estilos.manutencaoSecao}>
-          <Text style={estilos.manutencaoTitulo}>Programação da manutenção</Text>
+          <Text style={estilos.manutencaoTitulo}>
+            Programação da manutenção
+          </Text>
           <Pressable
-            style={({ pressed }) => [estilos.manutencaoRow, pressed && estilos.manutencaoRowPressed]}
+            style={({ pressed }) => [
+              estilos.manutencaoRow,
+              pressed && estilos.manutencaoRowPressed,
+            ]}
           >
             <Text style={estilos.manutencaoLabel}>Plano de manutenção</Text>
             <CaretIcon size={14} color={colors.textDim} />
@@ -283,8 +365,8 @@ const estilos = StyleSheet.create({
   },
   centrado: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: colors.bg,
   },
   scroll: {
@@ -293,9 +375,9 @@ const estilos = StyleSheet.create({
 
   // top chrome
   topChrome: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: spacing[5],
     paddingTop: spacing[3],
   },
@@ -313,8 +395,8 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.surfaceHi,
     borderWidth: 1,
     borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // header
@@ -326,41 +408,43 @@ const estilos = StyleSheet.create({
   subtitulo: {
     fontSize: typography.size.sm,
     color: colors.textDim,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: "Inter_400Regular",
     marginBottom: spacing[2],
     letterSpacing: 0.2,
   },
   titulo: {
-    fontSize: typography.size['3xl'],
+    fontSize: typography.size["3xl"],
     fontWeight: typography.weight.bold,
-    fontFamily: 'Inter_700Bold',
+    fontFamily: "Inter_700Bold",
     color: colors.text,
     letterSpacing: typography.letterSpacing.tight,
-    lineHeight: Math.round(typography.size['3xl'] * typography.lineHeight.tight),
+    lineHeight: Math.round(
+      typography.size["3xl"] * typography.lineHeight.tight,
+    ),
   },
 
   // odômetro
   odometroSecao: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: spacing[5],
   },
   odometroLabel: {
     fontSize: typography.size.md,
     color: colors.textDim,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: "Inter_400Regular",
     marginBottom: spacing[1],
   },
   odometroValor: {
     fontSize: 28,
     fontWeight: typography.weight.semibold,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_600SemiBold",
     color: colors.text,
     letterSpacing: -0.4,
   },
 
   // seção truck
   truckSecao: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: spacing[3],
   },
 
@@ -370,22 +454,22 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.ok,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   badgeTexto: {
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_600SemiBold",
     color: colors.ok,
   },
 
   // legenda pressão
   pressaoLegenda: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: typography.size.sm,
     color: colors.textDim,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: "Inter_400Regular",
     lineHeight: Math.round(typography.size.sm * typography.lineHeight.normal),
     marginHorizontal: spacing[6],
     marginBottom: spacing[5],
@@ -393,12 +477,12 @@ const estilos = StyleSheet.create({
   pressaoDestaque: {
     color: colors.text,
     fontWeight: typography.weight.semibold,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_600SemiBold",
   },
 
   // grid vitais
   vitaisGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginHorizontal: spacing[6],
     gap: spacing[3],
     marginBottom: spacing[6],
@@ -412,28 +496,28 @@ const estilos = StyleSheet.create({
     borderColor: colors.border,
   },
   vitalCardTopo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing[2],
     marginBottom: spacing[3],
   },
   vitalPct: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_600SemiBold",
     color: colors.ok,
   },
   vitalLabel: {
     fontSize: typography.size.sm,
     fontWeight: typography.weight.medium,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: "Inter_500Medium",
     color: colors.text,
     marginBottom: spacing[1],
   },
   vitalSub: {
     fontSize: typography.size.xs,
     color: colors.textDim,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: "Inter_400Regular",
   },
 
   // manutenção
@@ -444,7 +528,7 @@ const estilos = StyleSheet.create({
   manutencaoTitulo: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_600SemiBold",
     color: colors.text,
     marginBottom: spacing[3],
   },
@@ -455,16 +539,16 @@ const estilos = StyleSheet.create({
     paddingVertical: spacing[4],
     borderWidth: 1,
     borderColor: colors.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   manutencaoRowPressed: {
     backgroundColor: colors.surfaceHi,
   },
   manutencaoLabel: {
     fontSize: typography.size.base,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: "Inter_400Regular",
     color: colors.text,
   },
 
@@ -472,18 +556,18 @@ const estilos = StyleSheet.create({
   erroContainer: {
     marginHorizontal: spacing[6],
     marginBottom: spacing[4],
-    alignItems: 'center',
+    alignItems: "center",
     gap: spacing[2],
   },
   erroTexto: {
     color: colors.danger,
     fontSize: typography.size.sm,
-    textAlign: 'center',
-    fontFamily: 'Inter_400Regular',
+    textAlign: "center",
+    fontFamily: "Inter_400Regular",
   },
   erroLink: {
     color: colors.accent,
     fontSize: typography.size.sm,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: "Inter_500Medium",
   },
 });
