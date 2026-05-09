@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, KeyboardAvoidingView, ScrollView, Keyboard, Platform } from 'react-native';
+import { View, Text, Pressable, Image, StyleSheet, KeyboardAvoidingView, ScrollView, Keyboard, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
 import { FormularioLogin } from '../components/FormularioLogin';
-import { FordConnectLogo } from '../components/icons/FordConnectLogo';
 import { useAuth } from '../hooks/useAuth';
 import { colors } from '../constants/colors';
 import { typography } from '../constants/typography';
@@ -44,14 +42,10 @@ export default function TelaLogin() {
 
             {/* seção superior */}
             <View>
-              <LinearGradient
-                colors={[colors.accent, colors.accentDeep]}
-                start={{ x: 0.15, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={estilos.logoContainer}
-              >
-                <FordConnectLogo size={30} color="#fff" />
-              </LinearGradient>
+              <Image
+                source={require('../assets/images/logo-ford.png')}
+                style={estilos.logo}
+              />
               <Text style={estilos.titulo}>{'Ford\nConnect'}</Text>
               <Text style={estilos.subtitulo}>Conecte, controle e personalize seu Ford</Text>
             </View>
@@ -89,18 +83,11 @@ const estilos = StyleSheet.create({
     paddingBottom: spacing[10],
     justifyContent: 'space-between',
   },
-  logoContainer: {
-    width: 56,
-    height: 56,
+  logo: {
+    width: 72,
+    height: 72,
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: spacing[7],
-    shadowColor: colors.accent,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.33,
-    shadowRadius: 16,
-    elevation: 16,
   },
   titulo: {
     fontSize: typography.size['3xl'],
