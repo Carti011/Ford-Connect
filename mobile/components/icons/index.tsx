@@ -98,3 +98,24 @@ export function CaretIcon({ size = 14, color = '#fff' }: P) {
     </Svg>
   );
 }
+
+export function FanIcon({ size = 20, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="2" stroke={color} strokeWidth="1.6"/>
+      <Path d="M12 10c0-3 1.5-6 4-6 1.5 0 2 1.5 1 3s-3 2-5 3z" stroke={color} strokeWidth="1.5" strokeLinejoin="round"/>
+      <Path d="M14 12c3 0 6 1.5 6 4 0 1.5-1.5 2-3 1s-2-3-3-5z" stroke={color} strokeWidth="1.5" strokeLinejoin="round"/>
+      <Path d="M12 14c0 3-1.5 6-4 6-1.5 0-2-1.5-1-3s3-2 5-3z" stroke={color} strokeWidth="1.5" strokeLinejoin="round"/>
+      <Path d="M10 12c-3 0-6-1.5-6-4 0-1.5 1.5-2 3-1s2 3 3 5z" stroke={color} strokeWidth="1.5" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
+
+export function BellIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M18 16v-5a6 6 0 1 0-12 0v5l-2 2h16l-2-2z" stroke={color} strokeWidth="1.6" strokeLinejoin="round"/>
+      <Path d="M10 19a2 2 0 0 0 4 0" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+    </Svg>
+  );
+}

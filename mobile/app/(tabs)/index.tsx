@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, Image, ScrollView, Pressable,
-  ActivityIndicator, StyleSheet,
+  ActivityIndicator, StyleSheet, Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -9,7 +9,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { buscarVeiculo } from '../../services/veiculo';
 import { VehicleHero } from '../../components/VehicleHero';
 import { SlideToStart } from '../../components/SlideToStart';
-import { UserIcon, PinIcon, FuelIcon, CalendarIcon, LockIcon, UnlockIcon } from '../../components/icons';
+import { UserIcon, PinIcon, FuelIcon, CalendarIcon, LockIcon, UnlockIcon, FanIcon, BellIcon } from '../../components/icons';
 import { Veiculo } from '../../types';
 import { colors } from '../../constants/colors';
 import { typography } from '../../constants/typography';
@@ -27,11 +27,25 @@ const PLACEHOLDER = {
   proximaHora: '20:34',
 };
 
+// ─── agendamentos (placeholder — sem backend) ─────────────────
+const AGENDAMENTOS_INICIAL = [
+  { id: 'motor',     hora: '07:30', label: 'Ligar o motor · Dias úteis',      ativo: true  },
+  { id: 'clima',     hora: '08:00', label: 'Climatização automática',          ativo: false },
+  { id: 'revisao',   hora: '',      label: 'Lembrete de revisão pendente',     ativo: true  },
+];
+
 export default function TelaHome() {
   const { idVeiculo, sair } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [agendamentos, setAgendamentos] = useState(AGENDAMENTOS_INICIAL);
+
+  function toggleAgendamento(id: string) {
+    setAgendamentos(prev =>
+      prev.map(a => a.id === id ? { ...a, ativo: !a.ativo } : a)
+    );
+  }
 
   const carregar = useCallback(async () => {
     if (!idVeiculo) { setCarregando(false); return; }
@@ -131,6 +145,14 @@ export default function TelaHome() {
           <SlideToStart />
         </View>
 
+        {/* climatização */}
+        <Pressable
+          style={({ pressed }) => [estilos.climaTile, pressed && estilos.climaTilePressed]}
+        >
+          <FanIcon size={18} color={colors.text} />
+          <Text style={estilos.acaoTexto}>Climatização</Text>
+        </Pressable>
+
         {/* travar / destravar */}
         <View style={estilos.acoes}>
           <Pressable
@@ -145,6 +167,36 @@ export default function TelaHome() {
             <UnlockIcon size={18} color={colors.text} />
             <Text style={estilos.acaoTexto}>Destravar</Text>
           </Pressable>
+        </View>
+
+        {/* agendar */}
+        <View style={estilos.agendarSecao}>
+          <View style={estilos.agendarHeader}>
+            <Text style={estilos.agendarTitulo}>Agendar</Text>
+          </View>
+          {agendamentos.map((item, idx) => (
+            <View
+              key={item.id}
+              style={[
+                estilos.agendarRow,
+                idx < agendamentos.length - 1 && estilos.agendarRowBorder,
+              ]}
+            >
+              {item.hora ? (
+                <Text style={estilos.agendarHora}>{item.hora}</Text>
+              ) : (
+                <BellIcon size={16} color={colors.textDim} />
+              )}
+              <Text style={estilos.agendarLabel} numberOfLines={1}>{item.label}</Text>
+              <Switch
+                value={item.ativo}
+                onValueChange={() => toggleAgendamento(item.id)}
+                trackColor={{ false: colors.surfaceHi, true: colors.accent }}
+                thumbColor={colors.text}
+                ios_backgroundColor={colors.surfaceHi}
+              />
+            </View>
+          ))}
         </View>
 
         {/* espaço para a tab bar flutuante */}
@@ -335,6 +387,25 @@ const estilos = StyleSheet.create({
     marginBottom: spacing[3],
   },
 
+  // climatização
+  climaTile: {
+    marginHorizontal: spacing[6],
+    marginBottom: spacing[3],
+    height: 60,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[3],
+  },
+  climaTilePressed: {
+    backgroundColor: colors.surfaceHi,
+    transform: [{ scale: 0.98 }],
+  },
+
   // ações
   acoes: {
     flexDirection: 'row',
@@ -363,5 +434,54 @@ const estilos = StyleSheet.create({
     fontWeight: typography.weight.medium,
     fontFamily: 'Inter_500Medium',
     color: colors.text,
+  },
+
+  // agendar
+  agendarSecao: {
+    marginHorizontal: spacing[6],
+    marginBottom: spacing[6],
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+  },
+  agendarHeader: {
+    paddingHorizontal: spacing[5],
+    paddingTop: spacing[4],
+    paddingBottom: spacing[3],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  agendarTitulo: {
+    fontSize: typography.size.base,
+    fontWeight: typography.weight.semibold,
+    fontFamily: 'Inter_600SemiBold',
+    color: colors.text,
+    letterSpacing: 0.1,
+  },
+  agendarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing[5],
+    paddingVertical: spacing[4],
+    gap: spacing[4],
+  },
+  agendarRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  agendarHora: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.bold,
+    fontFamily: 'Inter_700Bold',
+    color: colors.text,
+    minWidth: 48,
+  },
+  agendarLabel: {
+    flex: 1,
+    fontSize: typography.size.md,
+    color: colors.textDim,
+    fontFamily: 'Inter_400Regular',
   },
 });
