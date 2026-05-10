@@ -27,7 +27,7 @@ jobs:
         run: ./mvnw test -Dspring.profiles.active=test --no-transfer-progress
 
   mobile:
-    name: Mobile — TypeScript
+    name: Mobile — Testes e TypeScript
     runs-on: ubuntu-latest
 
     steps:
@@ -47,7 +47,12 @@ jobs:
 
       - name: Gerar expo-env.d.ts
         working-directory: mobile
-        run: echo '/// <reference types="expo/types" />' > expo-env.d.ts
+        run: |
+          printf '/// <reference types="expo/types" />\n' > expo-env.d.ts
+
+      - name: Rodar testes Jest
+        working-directory: mobile
+        run: npm test -- --ci --passWithNoTests
 
       - name: Verificar tipos TypeScript
         working-directory: mobile
