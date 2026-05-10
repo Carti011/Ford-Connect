@@ -15,11 +15,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.springframework.http.MediaType;
 
 @WebMvcTest(AgendamentoController.class)
 class AgendamentoControllerTest {
@@ -106,5 +110,44 @@ class AgendamentoControllerTest {
         mockMvc.perform(patch("/api/agendamentos/" + id + "/ativo").with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.mensagem").value("Agendamento não encontrado"));
+    }
+
+    @Test
+    void deveRetornar401SemTokenNoPatchAtualizar() throws Exception {
+        mockMvc.perform(patch("/api/agendamentos/" + UUID.randomUUID()).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"hora\":\"09:00\",\"diasSemana\":\"FINS_DE_SEMANA\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void deveAtualizarAgendamento() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        AgendamentoVeiculoResponse response = new AgendamentoVeiculoResponse();
+        response.setId(id);
+        response.setTipo("motor");
+        response.setHora("09:00");
+        response.setDiasSemana("FINS_DE_SEMANA");
+        response.setAtivo(true);
+
+        when(agendamentoService.atualizar(eq(id), any())).thenReturn(response);
+
+        mockMvc.perform(patch("/api/agendamentos/" + id).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"hora\":\"09:00\",\"diasSemana\":\"FINS_DE_SEMANA\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hora").value("09:00"))
+                .andExpect(jsonPath("$.diasSemana").value("FINS_DE_SEMANA"));
+    }
+
+    @Test
+    @WithMockUser
+    void deveRetornar400ComBodyInvalido() throws Exception {
+        mockMvc.perform(patch("/api/agendamentos/" + UUID.randomUUID()).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"hora\":\"25:99\",\"diasSemana\":\"FINS_DE_SEMANA\"}"))
+                .andExpect(status().isBadRequest());
     }
 }

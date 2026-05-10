@@ -1,6 +1,7 @@
 package br.com.fordapp.service;
 
 import br.com.fordapp.dto.AgendamentoVeiculoResponse;
+import br.com.fordapp.dto.AtualizarAgendamentoRequest;
 import br.com.fordapp.model.AgendamentoVeiculo;
 import br.com.fordapp.model.Veiculo;
 import br.com.fordapp.repository.AgendamentoVeiculoRepository;
@@ -111,6 +112,36 @@ class AgendamentoVeiculoServiceTest {
         when(agendamentoRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> agendamentoService.alternarAtivo(idInexistente))
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void deveAtualizarHoraEDiasSemana() {
+        AtualizarAgendamentoRequest request = new AtualizarAgendamentoRequest();
+        request.setHora("09:00");
+        request.setDiasSemana("FINS_DE_SEMANA");
+
+        when(agendamentoRepository.findById(agendamentoMotor.getId()))
+                .thenReturn(Optional.of(agendamentoMotor));
+        when(agendamentoRepository.save(agendamentoMotor)).thenReturn(agendamentoMotor);
+
+        AgendamentoVeiculoResponse resultado = agendamentoService.atualizar(agendamentoMotor.getId(), request);
+
+        assertThat(resultado.getHora()).isEqualTo("09:00");
+        assertThat(resultado.getDiasSemana()).isEqualTo("FINS_DE_SEMANA");
+        verify(agendamentoRepository).save(agendamentoMotor);
+    }
+
+    @Test
+    void deveLancarExcecaoAoAtualizarAgendamentoInexistente() {
+        UUID idInexistente = UUID.randomUUID();
+        AtualizarAgendamentoRequest request = new AtualizarAgendamentoRequest();
+        request.setHora("09:00");
+        request.setDiasSemana("DIARIAMENTE");
+
+        when(agendamentoRepository.findById(idInexistente)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> agendamentoService.atualizar(idInexistente, request))
                 .isInstanceOf(NoSuchElementException.class);
     }
 }

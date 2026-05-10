@@ -1,6 +1,7 @@
 package br.com.fordapp.service;
 
 import br.com.fordapp.dto.AgendamentoVeiculoResponse;
+import br.com.fordapp.dto.AtualizarAgendamentoRequest;
 import br.com.fordapp.model.AgendamentoVeiculo;
 import br.com.fordapp.repository.AgendamentoVeiculoRepository;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,14 @@ public class AgendamentoVeiculoService {
                 .stream()
                 .map(AgendamentoVeiculoResponse::de)
                 .toList();
+    }
+
+    public AgendamentoVeiculoResponse atualizar(UUID id, AtualizarAgendamentoRequest request) {
+        AgendamentoVeiculo agendamento = agendamentoRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Agendamento não encontrado"));
+        agendamento.setHora(request.getHora());
+        agendamento.setDiasSemana(request.getDiasSemana());
+        return AgendamentoVeiculoResponse.de(agendamentoRepository.save(agendamento));
     }
 
     public AgendamentoVeiculoResponse alternarAtivo(UUID id) {
