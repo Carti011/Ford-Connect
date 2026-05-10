@@ -7,9 +7,9 @@ App mobile e API REST para proprietários de veículos Ford. Permite ao usuário
 Desenvolvido como parte do **Ford FIAP Challenge 2026** — atacando o desafio de retenção de clientes na rede oficial Ford através de visibilidade proativa sobre o veículo e sua manutenção.
 
 <p align="center">
-  <img src="docs/screenshots/login.jpg" alt="Tela de login" width="240" />
-  <img src="docs/screenshots/home.jpg" alt="Tela principal" width="240" />
-  <img src="docs/screenshots/dashboard.jpg" alt="Dashboard de vitais" width="240" />
+  <img src="docs/screenshots/login.png" alt="Tela de login" width="240" />
+  <img src="docs/screenshots/home.png" alt="Tela principal" width="240" />
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard de vitais" width="240" />
 </p>
 
 ---
