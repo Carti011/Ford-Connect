@@ -58,6 +58,7 @@ class AgendamentoControllerTest {
         motor.setTipo("motor");
         motor.setRotulo("Ligar o motor · Dias úteis");
         motor.setHora("07:30");
+        motor.setDiasSemana("DIAS_UTEIS");
         motor.setAtivo(true);
 
         AgendamentoVeiculoResponse clima = new AgendamentoVeiculoResponse();
@@ -72,6 +73,7 @@ class AgendamentoControllerTest {
         mockMvc.perform(get("/api/veiculos/" + veiculoId + "/agendamentos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].tipo").value("motor"))
+                .andExpect(jsonPath("$[0].diasSemana").value("DIAS_UTEIS"))
                 .andExpect(jsonPath("$[0].ativo").value(true))
                 .andExpect(jsonPath("$[1].tipo").value("clima"))
                 .andExpect(jsonPath("$[1].ativo").value(false));

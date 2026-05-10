@@ -9,6 +9,7 @@ public class AgendamentoVeiculoResponse {
     private String tipo;
     private String rotulo;
     private String hora;
+    private String diasSemana;
     private Boolean ativo;
 
     public AgendamentoVeiculoResponse() {}
@@ -19,6 +20,7 @@ public class AgendamentoVeiculoResponse {
         dto.tipo = agendamento.getTipo();
         dto.rotulo = agendamento.getRotulo();
         dto.hora = agendamento.getHora();
+        dto.diasSemana = agendamento.getDiasSemana();
         dto.ativo = agendamento.getAtivo();
         return dto;
     }
@@ -27,11 +29,13 @@ public class AgendamentoVeiculoResponse {
     public String getTipo() { return tipo; }
     public String getRotulo() { return rotulo; }
     public String getHora() { return hora; }
+    public String getDiasSemana() { return diasSemana; }
     public Boolean getAtivo() { return ativo; }
 
     public void setId(UUID id) { this.id = id; }
     public void setTipo(String tipo) { this.tipo = tipo; }
     public void setRotulo(String rotulo) { this.rotulo = rotulo; }
     public void setHora(String hora) { this.hora = hora; }
+    public void setDiasSemana(String diasSemana) { this.diasSemana = diasSemana; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
 }

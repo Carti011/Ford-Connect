@@ -45,6 +45,7 @@ class AgendamentoVeiculoServiceTest {
         agendamentoMotor.setTipo("motor");
         agendamentoMotor.setRotulo("Ligar o motor · Dias úteis");
         agendamentoMotor.setHora("07:30");
+        agendamentoMotor.setDiasSemana("DIAS_UTEIS");
         agendamentoMotor.setAtivo(true);
 
         agendamentoClima = new AgendamentoVeiculo();
@@ -54,6 +55,16 @@ class AgendamentoVeiculoServiceTest {
         agendamentoClima.setRotulo("Climatização automática");
         agendamentoClima.setHora("08:00");
         agendamentoClima.setAtivo(false);
+    }
+
+    @Test
+    void deveRetornarDiasSemanaNoResponse() {
+        when(agendamentoRepository.findByVeiculoId(veiculoId))
+                .thenReturn(List.of(agendamentoMotor));
+
+        List<AgendamentoVeiculoResponse> resultado = agendamentoService.listarPorVeiculo(veiculoId);
+
+        assertThat(resultado.get(0).getDiasSemana()).isEqualTo("DIAS_UTEIS");
     }
 
     @Test
