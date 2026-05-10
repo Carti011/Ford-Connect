@@ -45,6 +45,10 @@ jobs:
         working-directory: mobile
         run: npm ci
 
+      - name: Gerar expo-env.d.ts
+        working-directory: mobile
+        run: echo '/// <reference types="expo/types" />' > expo-env.d.ts
+
       - name: Verificar tipos TypeScript
         working-directory: mobile
         run: npx tsc --noEmit
