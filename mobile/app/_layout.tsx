@@ -13,11 +13,12 @@ function NavigationGuard() {
   useEffect(() => {
     if (carregando) return;
 
-    const estaNasAbas = segments[0] === '(tabs)';
+    const ROTAS_PROTEGIDAS = new Set(['(tabs)', 'perfil', 'notificacoes']);
+    const estaEmRotaProtegida = ROTAS_PROTEGIDAS.has(segments[0] as string);
 
-    if (!estaAutenticado && estaNasAbas) {
+    if (!estaAutenticado && estaEmRotaProtegida) {
       router.replace('/login');
-    } else if (estaAutenticado && !estaNasAbas) {
+    } else if (estaAutenticado && !estaEmRotaProtegida) {
       router.replace('/(tabs)');
     }
   }, [estaAutenticado, carregando, segments]);
@@ -34,6 +35,8 @@ function NavigationGuard() {
     <Stack>
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="perfil" options={{ headerShown: false }} />
+      <Stack.Screen name="notificacoes" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -37,7 +37,7 @@ const AGENDAMENTOS_INICIAL = [
 
 export default function TelaHome() {
   const router = useRouter();
-  const { idVeiculo, sair } = useAuth();
+  const { idVeiculo } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -87,10 +87,10 @@ export default function TelaHome() {
         <SafeAreaView edges={['top']} style={estilos.topChrome}>
           <Image source={require('../../assets/images/logo-ford.png')} style={estilos.logo} />
           <View style={estilos.topChromeDir}>
-            <Pressable onPress={() => router.push('/alerts')} style={estilos.avatarBtn}>
+            <Pressable onPress={() => router.push('/notificacoes')} style={estilos.avatarBtn}>
               <BellIcon size={20} color={colors.text} />
             </Pressable>
-            <Pressable onPress={sair} style={estilos.avatarBtn}>
+            <Pressable onPress={() => router.push('/perfil')} style={estilos.avatarBtn}>
               <UserIcon size={20} color={colors.text} />
             </Pressable>
           </View>
