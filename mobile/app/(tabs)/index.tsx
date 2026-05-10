@@ -1,70 +1,107 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  View, Text, Image, ScrollView, Pressable,
-  ActivityIndicator, StyleSheet, Switch,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
-import { useAuth } from '../../hooks/useAuth';
-import { buscarVeiculo } from '../../services/veiculo';
-import { VehicleHero } from '../../components/VehicleHero';
-import { SlideToStart } from '../../components/SlideToStart';
-import { UserIcon, PinIcon, FuelIcon, CalendarIcon, LockIcon, UnlockIcon, FanIcon, BellIcon } from '../../components/icons';
-import { Veiculo } from '../../types';
-import { colors } from '../../constants/colors';
-import { typography } from '../../constants/typography';
-import { spacing } from '../../constants/spacing';
-import { radius } from '../../constants/radius';
-import { layout } from '../../constants/layout';
+  View,
+  Text,
+  Image,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+  StyleSheet,
+  Switch,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
+import { useAuth } from "../../hooks/useAuth";
+import { buscarVeiculo } from "../../services/veiculo";
+import { VehicleHero } from "../../components/VehicleHero";
+import { SlideToStart } from "../../components/SlideToStart";
+import {
+  UserIcon,
+  PinIcon,
+  FuelIcon,
+  CalendarIcon,
+  LockIcon,
+  UnlockIcon,
+  FanIcon,
+  BellIcon,
+} from "../../components/icons";
+import { Veiculo } from "../../types";
+import { colors } from "../../constants/colors";
+import { typography } from "../../constants/typography";
+import { spacing } from "../../constants/spacing";
+import { radius } from "../../constants/radius";
+import { layout } from "../../constants/layout";
 
 // ─── dados hardcoded enquanto backend não expõe ──────────────
 const PLACEHOLDER = {
-  status: 'Estacionado',
-  localizacao: 'Localização',
-  combustivel: '80%',
-  autonomia: '400 km',
-  proximaDia: 'Dom.',
-  proximaHora: '20:34',
+  status: "Estacionado",
+  localizacao: "Localização",
+  combustivel: "80%",
+  autonomia: "400 km",
+  proximaDia: "Dom.",
+  proximaHora: "20:34",
 };
 
 // ─── agendamentos (placeholder — sem backend) ─────────────────
 const AGENDAMENTOS_INICIAL = [
-  { id: 'motor',     hora: '07:30', label: 'Ligar o motor · Dias úteis',      ativo: true  },
-  { id: 'clima',     hora: '08:00', label: 'Climatização automática',          ativo: false },
-  { id: 'revisao',   hora: '',      label: 'Lembrete de revisão pendente',     ativo: true  },
+  {
+    id: "motor",
+    hora: "07:30",
+    label: "Ligar o motor · Dias úteis",
+    ativo: true,
+  },
+  {
+    id: "clima",
+    hora: "08:00",
+    label: "Climatização automática",
+    ativo: false,
+  },
+  {
+    id: "revisao",
+    hora: "",
+    label: "Lembrete de revisão pendente",
+    ativo: true,
+  },
 ];
 
 export default function TelaHome() {
   const router = useRouter();
-  const { idVeiculo, sair } = useAuth();
+  const { idVeiculo } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [agendamentos, setAgendamentos] = useState(AGENDAMENTOS_INICIAL);
 
   function toggleAgendamento(id: string) {
-    setAgendamentos(prev =>
-      prev.map(a => a.id === id ? { ...a, ativo: !a.ativo } : a)
+    setAgendamentos((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ativo: !a.ativo } : a)),
     );
   }
 
   const carregar = useCallback(async () => {
-    if (!idVeiculo) { setCarregando(false); return; }
+    if (!idVeiculo) {
+      setCarregando(false);
+      return;
+    }
     setCarregando(true);
     setErro(null);
     try {
       setVeiculo(await buscarVeiculo(idVeiculo));
     } catch (e: any) {
-      setErro(e?.response?.status === 401
-        ? 'Sessão expirada. Faça login novamente.'
-        : 'Não foi possível carregar os dados.');
+      setErro(
+        e?.response?.status === 401
+          ? "Sessão expirada. Faça login novamente."
+          : "Não foi possível carregar os dados.",
+      );
     } finally {
       setCarregando(false);
     }
   }, [idVeiculo]);
 
-  useEffect(() => { carregar(); }, [carregar]);
+  useEffect(() => {
+    carregar();
+  }, [carregar]);
 
   if (carregando) {
     return (
@@ -74,7 +111,9 @@ export default function TelaHome() {
     );
   }
 
-  const modelo = veiculo ? `${veiculo.modelo}${veiculo.versao ? ' ' + veiculo.versao : ''}` : '—';
+  const modelo = veiculo
+    ? `${veiculo.modelo}${veiculo.versao ? " " + veiculo.versao : ""}`
+    : "—";
 
   return (
     <View style={estilos.tela}>
@@ -84,13 +123,22 @@ export default function TelaHome() {
         showsVerticalScrollIndicator={false}
       >
         {/* top chrome */}
-        <SafeAreaView edges={['top']} style={estilos.topChrome}>
-          <Image source={require('../../assets/images/logo-ford.png')} style={estilos.logo} />
+        <SafeAreaView edges={["top"]} style={estilos.topChrome}>
+          <Image
+            source={require("../../assets/images/logo-ford.png")}
+            style={estilos.logo}
+          />
           <View style={estilos.topChromeDir}>
-            <Pressable onPress={() => router.push('/alerts')} style={estilos.avatarBtn}>
+            <Pressable
+              onPress={() => router.push("/notificacoes")}
+              style={estilos.avatarBtn}
+            >
               <BellIcon size={20} color={colors.text} />
             </Pressable>
-            <Pressable onPress={sair} style={estilos.avatarBtn}>
+            <Pressable
+              onPress={() => router.push("/perfil")}
+              style={estilos.avatarBtn}
+            >
               <UserIcon size={20} color={colors.text} />
             </Pressable>
           </View>
@@ -103,11 +151,17 @@ export default function TelaHome() {
         </View>
 
         {/* pill localização */}
-        <View style={estilos.locationPill}>
+        <Pressable
+          onPress={() => router.push("/localizacao")}
+          style={({ pressed }) => [
+            estilos.locationPill,
+            pressed && estilos.locationPillPressed,
+          ]}
+        >
           <PinIcon size={18} color={colors.text} />
-          <Text style={estilos.locationTexto}>{PLACEHOLDER.localizacao}</Text>
+          <Text style={estilos.locationTexto}>Localização</Text>
           <View style={estilos.locationCaret} />
-        </View>
+        </Pressable>
 
         {/* hero veículo */}
         <View style={estilos.heroContainer}>
@@ -149,12 +203,22 @@ export default function TelaHome() {
 
         {/* slide para partida */}
         <View style={estilos.slideContainer}>
-          <SlideToStart />
+          <SlideToStart
+            onComplete={() =>
+              router.push(
+                `/iniciando-motor?modelo=${encodeURIComponent(veiculo?.modelo ?? 'Ranger')}`,
+              )
+            }
+          />
         </View>
 
         {/* climatização */}
         <Pressable
-          style={({ pressed }) => [estilos.climaTile, pressed && estilos.climaTilePressed]}
+          onPress={() => router.push('/climatizacao')}
+          style={({ pressed }) => [
+            estilos.climaTile,
+            pressed && estilos.climaTilePressed,
+          ]}
         >
           <FanIcon size={18} color={colors.text} />
           <Text style={estilos.acaoTexto}>Climatização</Text>
@@ -163,13 +227,21 @@ export default function TelaHome() {
         {/* travar / destravar */}
         <View style={estilos.acoes}>
           <Pressable
-            style={({ pressed }) => [estilos.acaoTile, pressed && estilos.acaoTilePressed]}
+            onPress={() => router.push('/trava?acao=travar')}
+            style={({ pressed }) => [
+              estilos.acaoTile,
+              pressed && estilos.acaoTilePressed,
+            ]}
           >
             <LockIcon size={18} color={colors.text} />
             <Text style={estilos.acaoTexto}>Travar</Text>
           </Pressable>
           <Pressable
-            style={({ pressed }) => [estilos.acaoTile, pressed && estilos.acaoTilePressed]}
+            onPress={() => router.push('/trava?acao=destravar')}
+            style={({ pressed }) => [
+              estilos.acaoTile,
+              pressed && estilos.acaoTilePressed,
+            ]}
           >
             <UnlockIcon size={18} color={colors.text} />
             <Text style={estilos.acaoTexto}>Destravar</Text>
@@ -178,9 +250,13 @@ export default function TelaHome() {
 
         {/* agendar */}
         <View style={estilos.agendarSecao}>
-          <View style={estilos.agendarHeader}>
+          <Pressable
+            onPress={() => router.push('/agendar')}
+            style={({ pressed }) => [estilos.agendarHeader, pressed && estilos.agendarHeaderPressed]}
+          >
             <Text style={estilos.agendarTitulo}>Agendar</Text>
-          </View>
+            <Text style={estilos.agendarPlus}>+</Text>
+          </Pressable>
           {agendamentos.map((item, idx) => (
             <View
               key={item.id}
@@ -194,7 +270,9 @@ export default function TelaHome() {
               ) : (
                 <BellIcon size={16} color={colors.textDim} />
               )}
-              <Text style={estilos.agendarLabel} numberOfLines={1}>{item.label}</Text>
+              <Text style={estilos.agendarLabel} numberOfLines={1}>
+                {item.label}
+              </Text>
               <Switch
                 value={item.ativo}
                 onValueChange={() => toggleAgendamento(item.id)}
@@ -220,8 +298,8 @@ const estilos = StyleSheet.create({
   },
   centrado: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: colors.bg,
   },
   scroll: {
@@ -230,9 +308,9 @@ const estilos = StyleSheet.create({
 
   // top chrome
   topChrome: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: spacing[5],
     paddingTop: spacing[3],
   },
@@ -244,7 +322,7 @@ const estilos = StyleSheet.create({
     borderColor: colors.border,
   },
   topChromeDir: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing[2],
   },
   avatarBtn: {
@@ -254,8 +332,8 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.surfaceHi,
     borderWidth: 1,
     borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // status header
@@ -267,16 +345,18 @@ const estilos = StyleSheet.create({
   modeloTexto: {
     fontSize: typography.size.sm,
     color: colors.textDim,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: "Inter_400Regular",
     marginBottom: spacing[2],
     letterSpacing: 0.2,
   },
   statusTexto: {
-    fontSize: typography.size['4xl'],
+    fontSize: typography.size["4xl"],
     fontWeight: typography.weight.bold,
-    fontFamily: 'Inter_700Bold',
+    fontFamily: "Inter_700Bold",
     color: colors.text,
-    lineHeight: Math.round(typography.size['4xl'] * typography.lineHeight.tight),
+    lineHeight: Math.round(
+      typography.size["4xl"] * typography.lineHeight.tight,
+    ),
     letterSpacing: typography.letterSpacing.tight,
   },
 
@@ -289,9 +369,9 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1.5,
     borderColor: colors.accent,
-    borderRadius: radius['2xl'],
-    flexDirection: 'row',
-    alignItems: 'center',
+    borderRadius: radius["2xl"],
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing[3],
     shadowColor: colors.accent,
     shadowOffset: { width: 0, height: 0 },
@@ -299,11 +379,15 @@ const estilos = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  locationPillPressed: {
+    backgroundColor: colors.surfaceHi,
+    transform: [{ scale: 0.98 }],
+  },
   locationTexto: {
     flex: 1,
     fontSize: typography.size.base,
     color: colors.text,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: "Inter_400Regular",
   },
   locationCaret: {
     width: 6,
@@ -311,7 +395,7 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1.5,
     borderRightWidth: 1.5,
     borderColor: colors.textDim,
-    transform: [{ rotate: '45deg' }],
+    transform: [{ rotate: "45deg" }],
   },
 
   // hero
@@ -319,14 +403,14 @@ const estilos = StyleSheet.create({
     marginHorizontal: spacing[6],
     marginBottom: spacing[4],
     backgroundColor: colors.surfaceLo,
-    borderRadius: radius['2xl'],
+    borderRadius: radius["2xl"],
     paddingVertical: spacing[3],
     paddingHorizontal: 0,
   },
 
   // stats
   statsGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: spacing[6],
     paddingBottom: spacing[5],
     gap: spacing[5],
@@ -335,41 +419,41 @@ const estilos = StyleSheet.create({
     flex: 1,
   },
   statDireita: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   statHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing[2],
     marginBottom: spacing[2],
   },
   statHeaderDireita: {
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   statLabel: {
     fontSize: typography.size.md,
     color: colors.textDim,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: "Inter_400Regular",
   },
   statValores: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    flexDirection: "row",
+    alignItems: "baseline",
     gap: spacing[2],
   },
   statValoresDireita: {
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   statBig: {
-    fontSize: typography.size['2xl'],
+    fontSize: typography.size["2xl"],
     fontWeight: typography.weight.semibold,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_600SemiBold",
     color: colors.text,
     letterSpacing: typography.letterSpacing.normal,
   },
   statSub: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.medium,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: "Inter_500Medium",
     color: colors.text,
   },
 
@@ -377,19 +461,19 @@ const estilos = StyleSheet.create({
   erroContainer: {
     marginHorizontal: spacing[6],
     marginBottom: spacing[4],
-    alignItems: 'center',
+    alignItems: "center",
     gap: spacing[2],
   },
   erroTexto: {
     color: colors.danger,
     fontSize: typography.size.sm,
-    textAlign: 'center',
-    fontFamily: 'Inter_400Regular',
+    textAlign: "center",
+    fontFamily: "Inter_400Regular",
   },
   erroLink: {
     color: colors.accent,
     fontSize: typography.size.sm,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: "Inter_500Medium",
   },
 
   // slide
@@ -407,9 +491,9 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: spacing[3],
   },
   climaTilePressed: {
@@ -419,7 +503,7 @@ const estilos = StyleSheet.create({
 
   // ações
   acoes: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginHorizontal: spacing[6],
     gap: spacing[3],
     marginBottom: spacing[6],
@@ -431,9 +515,9 @@ const estilos = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: spacing[3],
   },
   acaoTilePressed: {
@@ -443,7 +527,7 @@ const estilos = StyleSheet.create({
   acaoTexto: {
     fontSize: typography.size.base,
     fontWeight: typography.weight.medium,
-    fontFamily: 'Inter_500Medium',
+    fontFamily: "Inter_500Medium",
     color: colors.text,
   },
 
@@ -455,7 +539,7 @@ const estilos = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   agendarHeader: {
     paddingHorizontal: spacing[5],
@@ -463,17 +547,29 @@ const estilos = StyleSheet.create({
     paddingBottom: spacing[3],
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  agendarHeaderPressed: {
+    backgroundColor: colors.surfaceHi,
+  },
+  agendarPlus: {
+    fontSize: 22,
+    color: colors.accent,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 26,
   },
   agendarTitulo: {
     fontSize: typography.size.base,
     fontWeight: typography.weight.semibold,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: "Inter_600SemiBold",
     color: colors.text,
     letterSpacing: 0.1,
   },
   agendarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: spacing[5],
     paddingVertical: spacing[4],
     gap: spacing[4],
@@ -485,7 +581,7 @@ const estilos = StyleSheet.create({
   agendarHora: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
-    fontFamily: 'Inter_700Bold',
+    fontFamily: "Inter_700Bold",
     color: colors.text,
     minWidth: 48,
   },
@@ -493,6 +589,6 @@ const estilos = StyleSheet.create({
     flex: 1,
     fontSize: typography.size.md,
     color: colors.textDim,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: "Inter_400Regular",
   },
 });

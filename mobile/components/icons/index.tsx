@@ -156,3 +156,71 @@ export function WiperIcon({ size = 18, color = '#fff' }: P) {
     </Svg>
   );
 }
+
+export function EditIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      <Path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
+
+export function PhoneIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24c1.12.37 2.33.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1L6.6 10.8z" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
+
+export function ShieldIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 3L4 7v5c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V7L12 3z" stroke={color} strokeWidth="1.6" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
+
+export function IdCardIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="2" y="5" width="20" height="14" rx="2" stroke={color} strokeWidth="1.6"/>
+      <Circle cx="8" cy="12" r="2.5" stroke={color} strokeWidth="1.4"/>
+      <Path d="M13 10h5M13 14h3" stroke={color} strokeWidth="1.4" strokeLinecap="round"/>
+    </Svg>
+  );
+}
+
+export function ChevronLeftIcon({ size = 20, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M15 18l-6-6 6-6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
+
+export function LogoutIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
+
+export function ShareIcon({ size = 20, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98M21 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM9 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 19a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+    </Svg>
+  );
+}
+
+export function CompassIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.6"/>
+      <Path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z" stroke={color} strokeWidth="1.5" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
