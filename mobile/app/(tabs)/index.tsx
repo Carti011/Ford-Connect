@@ -250,9 +250,13 @@ export default function TelaHome() {
 
         {/* agendar */}
         <View style={estilos.agendarSecao}>
-          <View style={estilos.agendarHeader}>
+          <Pressable
+            onPress={() => router.push('/agendar')}
+            style={({ pressed }) => [estilos.agendarHeader, pressed && estilos.agendarHeaderPressed]}
+          >
             <Text style={estilos.agendarTitulo}>Agendar</Text>
-          </View>
+            <Text style={estilos.agendarPlus}>+</Text>
+          </Pressable>
           {agendamentos.map((item, idx) => (
             <View
               key={item.id}
@@ -543,6 +547,18 @@ const estilos = StyleSheet.create({
     paddingBottom: spacing[3],
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  agendarHeaderPressed: {
+    backgroundColor: colors.surfaceHi,
+  },
+  agendarPlus: {
+    fontSize: 22,
+    color: colors.accent,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 26,
   },
   agendarTitulo: {
     fontSize: typography.size.base,

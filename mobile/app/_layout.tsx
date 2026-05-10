@@ -13,7 +13,7 @@ function NavigationGuard() {
   useEffect(() => {
     if (carregando) return;
 
-    const ROTAS_PROTEGIDAS = new Set(['(tabs)', 'perfil', 'notificacoes', 'localizacao', 'iniciando-motor', 'climatizacao', 'trava']);
+    const ROTAS_PROTEGIDAS = new Set(['(tabs)', 'perfil', 'notificacoes', 'localizacao', 'iniciando-motor', 'climatizacao', 'trava', 'agendar']);
     const estaEmRotaProtegida = ROTAS_PROTEGIDAS.has(segments[0] as string);
 
     if (!estaAutenticado && estaEmRotaProtegida) {
@@ -41,6 +41,7 @@ function NavigationGuard() {
       <Stack.Screen name="iniciando-motor" options={{ headerShown: false }} />
       <Stack.Screen name="climatizacao" options={{ headerShown: false }} />
       <Stack.Screen name="trava" options={{ headerShown: false }} />
+      <Stack.Screen name="agendar" options={{ headerShown: false }} />
     </Stack>
   );
 }
