@@ -58,6 +58,26 @@ class VeiculoControllerTest {
 
     @Test
     @WithMockUser
+    void deveSerializarCamposExpandidosNoResponse() throws Exception {
+        UUID id = UUID.randomUUID();
+        VeiculoResponse response = new VeiculoResponse();
+        response.setId(id);
+        response.setModelo("Ranger");
+        response.setStatusVeiculo("Estacionado");
+        response.setNivelCombustivel(80);
+        response.setAutonomiaKm(400);
+
+        when(veiculoService.buscarPorId(id)).thenReturn(response);
+
+        mockMvc.perform(get("/api/veiculos/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.statusVeiculo").value("Estacionado"))
+                .andExpect(jsonPath("$.nivelCombustivel").value(80))
+                .andExpect(jsonPath("$.autonomiaKm").value(400));
+    }
+
+    @Test
+    @WithMockUser
     void deveRetornar404QuandoVeiculoNaoEncontrado() throws Exception {
         UUID id = UUID.randomUUID();
         when(veiculoService.buscarPorId(id))

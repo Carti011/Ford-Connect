@@ -36,6 +36,15 @@ public class Veiculo {
 
     private Integer quilometragem;
 
+    @Column(name = "status_veiculo", nullable = false, length = 50)
+    private String statusVeiculo;
+
+    @Column(name = "nivel_combustivel", nullable = false)
+    private Integer nivelCombustivel;
+
+    @Column(name = "autonomia_km", nullable = false)
+    private Integer autonomiaKm;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
@@ -55,6 +64,9 @@ public class Veiculo {
     public Integer getAno() { return ano; }
     public String getPlaca() { return placa; }
     public Integer getQuilometragem() { return quilometragem; }
+    public String getStatusVeiculo() { return statusVeiculo; }
+    public Integer getNivelCombustivel() { return nivelCombustivel; }
+    public Integer getAutonomiaKm() { return autonomiaKm; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
 
     public void setId(UUID id) { this.id = id; }
@@ -66,5 +78,8 @@ public class Veiculo {
     public void setAno(Integer ano) { this.ano = ano; }
     public void setPlaca(String placa) { this.placa = placa; }
     public void setQuilometragem(Integer quilometragem) { this.quilometragem = quilometragem; }
+    public void setStatusVeiculo(String statusVeiculo) { this.statusVeiculo = statusVeiculo; }
+    public void setNivelCombustivel(Integer nivelCombustivel) { this.nivelCombustivel = nivelCombustivel; }
+    public void setAutonomiaKm(Integer autonomiaKm) { this.autonomiaKm = autonomiaKm; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
 }

@@ -13,6 +13,9 @@ public class VeiculoResponse {
     private Integer ano;
     private String placa;
     private Integer quilometragem;
+    private String statusVeiculo;
+    private Integer nivelCombustivel;
+    private Integer autonomiaKm;
 
     public VeiculoResponse() {}
 
@@ -26,6 +29,9 @@ public class VeiculoResponse {
         dto.ano = veiculo.getAno();
         dto.placa = veiculo.getPlaca();
         dto.quilometragem = veiculo.getQuilometragem();
+        dto.statusVeiculo = veiculo.getStatusVeiculo();
+        dto.nivelCombustivel = veiculo.getNivelCombustivel();
+        dto.autonomiaKm = veiculo.getAutonomiaKm();
         return dto;
     }
 
@@ -37,6 +43,9 @@ public class VeiculoResponse {
     public Integer getAno() { return ano; }
     public String getPlaca() { return placa; }
     public Integer getQuilometragem() { return quilometragem; }
+    public String getStatusVeiculo() { return statusVeiculo; }
+    public Integer getNivelCombustivel() { return nivelCombustivel; }
+    public Integer getAutonomiaKm() { return autonomiaKm; }
 
     public void setId(UUID id) { this.id = id; }
     public void setNomeProprietario(String nomeProprietario) { this.nomeProprietario = nomeProprietario; }
@@ -46,4 +55,7 @@ public class VeiculoResponse {
     public void setAno(Integer ano) { this.ano = ano; }
     public void setPlaca(String placa) { this.placa = placa; }
     public void setQuilometragem(Integer quilometragem) { this.quilometragem = quilometragem; }
+    public void setStatusVeiculo(String statusVeiculo) { this.statusVeiculo = statusVeiculo; }
+    public void setNivelCombustivel(Integer nivelCombustivel) { this.nivelCombustivel = nivelCombustivel; }
+    public void setAutonomiaKm(Integer autonomiaKm) { this.autonomiaKm = autonomiaKm; }
 }

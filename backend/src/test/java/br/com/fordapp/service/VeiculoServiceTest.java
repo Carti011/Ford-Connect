@@ -59,6 +59,20 @@ class VeiculoServiceTest {
     }
 
     @Test
+    void deveRetornarVeiculoComDadosExpandidos() {
+        veiculo.setStatusVeiculo("Estacionado");
+        veiculo.setNivelCombustivel(80);
+        veiculo.setAutonomiaKm(400);
+        when(veiculoRepository.findById(veiculo.getId())).thenReturn(Optional.of(veiculo));
+
+        VeiculoResponse response = veiculoService.buscarPorId(veiculo.getId());
+
+        assertThat(response.getStatusVeiculo()).isEqualTo("Estacionado");
+        assertThat(response.getNivelCombustivel()).isEqualTo(80);
+        assertThat(response.getAutonomiaKm()).isEqualTo(400);
+    }
+
+    @Test
     void deveLancarExcecaoQuandoVeiculoNaoEncontrado() {
         UUID idInexistente = UUID.randomUUID();
         when(veiculoRepository.findById(idInexistente)).thenReturn(Optional.empty());
