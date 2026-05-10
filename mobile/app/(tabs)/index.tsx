@@ -227,6 +227,7 @@ export default function TelaHome() {
         {/* travar / destravar */}
         <View style={estilos.acoes}>
           <Pressable
+            onPress={() => router.push('/trava?acao=travar')}
             style={({ pressed }) => [
               estilos.acaoTile,
               pressed && estilos.acaoTilePressed,
@@ -236,6 +237,7 @@ export default function TelaHome() {
             <Text style={estilos.acaoTexto}>Travar</Text>
           </Pressable>
           <Pressable
+            onPress={() => router.push('/trava?acao=destravar')}
             style={({ pressed }) => [
               estilos.acaoTile,
               pressed && estilos.acaoTilePressed,
