@@ -8,7 +8,11 @@ import { PowerIcon, CaretIcon } from './icons';
 
 const HANDLE_SIZE = 64;
 
-export function SlideToStart() {
+interface Props {
+  onComplete?: () => void;
+}
+
+export function SlideToStart({ onComplete }: Props) {
   const trackWidth = useRef(0);
   const translateX = useRef(new Animated.Value(0)).current;
 
@@ -23,11 +27,10 @@ export function SlideToStart() {
     onPanResponderRelease: (_, g) => {
       const maxX = trackWidth.current - HANDLE_SIZE;
       if (g.dx >= maxX * 0.8) {
-        Animated.sequence([
-          Animated.timing(translateX, { toValue: maxX, duration: 100, useNativeDriver: true }),
-          Animated.delay(400),
-          Animated.timing(translateX, { toValue: 0, duration: 300, useNativeDriver: true }),
-        ]).start();
+        Animated.timing(translateX, { toValue: maxX, duration: 100, useNativeDriver: true }).start(() => {
+          onComplete?.();
+          Animated.timing(translateX, { toValue: 0, duration: 300, useNativeDriver: true }).start();
+        });
       } else {
         Animated.timing(translateX, { toValue: 0, duration: 200, useNativeDriver: true }).start();
       }

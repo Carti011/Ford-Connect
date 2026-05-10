@@ -203,7 +203,13 @@ export default function TelaHome() {
 
         {/* slide para partida */}
         <View style={estilos.slideContainer}>
-          <SlideToStart />
+          <SlideToStart
+            onComplete={() =>
+              router.push(
+                `/iniciando-motor?modelo=${encodeURIComponent(veiculo?.modelo ?? 'Ranger')}`,
+              )
+            }
+          />
         </View>
 
         {/* climatização */}

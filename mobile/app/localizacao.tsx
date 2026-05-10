@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  View, Text, Pressable, StyleSheet, Alert, Share,
-  ActivityIndicator,
+  View, Text, Pressable, StyleSheet, Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -165,7 +164,6 @@ export default function TelaLocalizacao() {
   const { idVeiculo } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
   const [coords, setCoords] = useState({ lat: MOCK.lat, lng: MOCK.lng });
-  const [ligando, setLigando] = useState(false);
 
   const carregar = useCallback(async () => {
     if (!idVeiculo) return;
@@ -192,16 +190,8 @@ export default function TelaLocalizacao() {
     } catch { /* silencioso */ }
   }
 
-  async function ligarCarro() {
-    setLigando(true);
-    // simula delay de comando remoto
-    await new Promise(r => setTimeout(r, 1500));
-    setLigando(false);
-    Alert.alert(
-      'Comando enviado',
-      'O veículo foi iniciado remotamente. O motor será desligado automaticamente em 10 minutos caso o carro não seja utilizado.',
-      [{ text: 'OK' }],
-    );
+  function ligarCarro() {
+    router.push(`/iniciando-motor?modelo=${encodeURIComponent(modelo)}&origem=localizacao`);
   }
 
   const modelo = veiculo?.modelo ?? 'Ranger';
@@ -297,21 +287,13 @@ export default function TelaLocalizacao() {
         <View style={estilos.acoesRow}>
           <Pressable
             onPress={ligarCarro}
-            disabled={ligando}
             style={({ pressed }) => [
               estilos.btnLigar,
               pressed && estilos.btnLigarPressed,
-              ligando && estilos.btnLigarDesabilitado,
             ]}
           >
-            {ligando ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <PowerIcon size={18} color="#fff" />
-                <Text style={estilos.btnLigarTexto}>Ligar o carro</Text>
-              </>
-            )}
+            <PowerIcon size={18} color="#fff" />
+            <Text style={estilos.btnLigarTexto}>Ligar o carro</Text>
           </Pressable>
 
           <Pressable
