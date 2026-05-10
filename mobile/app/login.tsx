@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Image, StyleSheet, KeyboardAvoidingView, ScrollView, Keyboard, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { FormularioLogin } from '../components/FormularioLogin';
 import { useAuth } from '../hooks/useAuth';
+import { colors } from '../constants/colors';
+import { typography } from '../constants/typography';
+import { spacing } from '../constants/spacing';
 
 export default function TelaLogin() {
   const { entrar } = useAuth();
@@ -10,6 +14,7 @@ export default function TelaLogin() {
   const [erro, setErro] = useState<string | null>(null);
 
   async function handleSubmit(email: string, senha: string) {
+    Keyboard.dismiss();
     setCarregando(true);
     setErro(null);
     try {
@@ -23,16 +28,42 @@ export default function TelaLogin() {
 
   return (
     <SafeAreaView style={estilos.tela}>
-      <View style={estilos.conteudo}>
-        <View style={estilos.cabecalho}>
-          <View style={estilos.logoContainer}>
-            <Text style={estilos.logoTexto}>FORD</Text>
-          </View>
-          <Text style={estilos.titulo}>Ford Connect</Text>
-          <Text style={estilos.subtitulo}>Acesse sua conta para ver seu veículo</Text>
-        </View>
-        <FormularioLogin onSubmit={handleSubmit} carregando={carregando} erro={erro} />
-      </View>
+      <StatusBar style="light" />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          contentContainerStyle={estilos.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Pressable style={estilos.conteudo} onPress={Keyboard.dismiss}>
+
+            {/* seção superior */}
+            <View>
+              <Image
+                source={require('../assets/images/logo-ford.png')}
+                style={estilos.logo}
+              />
+              <Text style={estilos.titulo}>{'Ford\nConnect'}</Text>
+              <Text style={estilos.subtitulo}>Conecte, controle e personalize seu Ford</Text>
+            </View>
+
+            {/* seção central */}
+            <View>
+              <FormularioLogin onSubmit={handleSubmit} carregando={carregando} erro={erro} />
+              <Pressable style={estilos.linkContainer}>
+                <Text style={estilos.link}>Esqueceu sua senha?</Text>
+              </Pressable>
+            </View>
+
+            {/* rodapé */}
+            <Text style={estilos.rodape}>FIAP × FORD CHALLENGE 2026</Text>
+
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -40,41 +71,54 @@ export default function TelaLogin() {
 const estilos = StyleSheet.create({
   tela: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.bg,
+  },
+  scroll: {
+    flexGrow: 1,
   },
   conteudo: {
     flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: 'center',
-    gap: 32,
+    paddingHorizontal: spacing[7],
+    paddingTop: 60,
+    paddingBottom: spacing[10],
+    justifyContent: 'space-between',
   },
-  cabecalho: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#003478',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  logoTexto: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '900',
-    letterSpacing: 3,
+  logo: {
+    width: 72,
+    height: 72,
+    borderRadius: 16,
+    marginBottom: spacing[7],
   },
   titulo: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#111',
+    fontSize: typography.size['3xl'],
+    fontWeight: typography.weight.bold,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: typography.letterSpacing.tight,
+    lineHeight: Math.round(typography.size['3xl'] * typography.lineHeight.tight),
+    color: colors.text,
   },
   subtitulo: {
-    fontSize: 14,
-    color: '#666',
+    marginTop: spacing[3],
+    color: colors.textDim,
+    fontSize: typography.size.base,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: Math.round(typography.size.base * typography.lineHeight.normal),
+  },
+  linkContainer: {
+    alignItems: 'center',
+    marginTop: spacing[5],
+    paddingVertical: spacing[2],
+  },
+  link: {
+    color: colors.textDim,
+    fontSize: typography.size.md,
+    fontFamily: 'Inter_400Regular',
+  },
+  rodape: {
     textAlign: 'center',
+    color: colors.textMuted,
+    fontSize: typography.size.xs,
+    fontFamily: 'Inter_500Medium',
+    letterSpacing: 1.5,
   },
 });

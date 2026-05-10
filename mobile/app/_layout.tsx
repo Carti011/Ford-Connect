@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { AuthProvider, useAuth } from '../hooks/useAuth';
+import { colors } from '../constants/colors';
 
 function NavigationGuard() {
   const { estaAutenticado, carregando } = useAuth();
@@ -22,8 +24,8 @@ function NavigationGuard() {
 
   if (carregando) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" color="#003478" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
@@ -37,6 +39,17 @@ function NavigationGuard() {
 }
 
 export default function RootLayout() {
+  const [fontsCarregadas] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  if (!fontsCarregadas) {
+    return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
+  }
+
   return (
     <AuthProvider>
       <NavigationGuard />
