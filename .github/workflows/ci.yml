@@ -27,7 +27,7 @@ jobs:
         run: ./mvnw test -Dspring.profiles.active=test --no-transfer-progress
 
   mobile:
-    name: Mobile — Testes e TypeScript
+    name: Mobile — TypeScript
     runs-on: ubuntu-latest
 
     steps:
