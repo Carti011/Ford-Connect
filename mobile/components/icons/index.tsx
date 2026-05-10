@@ -207,3 +207,20 @@ export function LogoutIcon({ size = 18, color = '#fff' }: P) {
     </Svg>
   );
 }
+
+export function ShareIcon({ size = 20, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98M21 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM9 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 19a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" stroke={color} strokeWidth="1.6" strokeLinecap="round"/>
+    </Svg>
+  );
+}
+
+export function CompassIcon({ size = 18, color = '#fff' }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.6"/>
+      <Path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z" stroke={color} strokeWidth="1.5" strokeLinejoin="round"/>
+    </Svg>
+  );
+}
