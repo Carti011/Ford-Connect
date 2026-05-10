@@ -14,6 +14,17 @@ export interface Veiculo {
   ano: number;
   placa: string;
   quilometragem: number;
+  statusVeiculo: string;
+  nivelCombustivel: number;
+  autonomiaKm: number;
+}
+
+export interface AgendamentoVeiculo {
+  id: string;
+  tipo: string;
+  rotulo: string;
+  hora: string | null;
+  ativo: boolean;
 }
 
 export interface RegistroManutencao {
