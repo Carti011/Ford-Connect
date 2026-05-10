@@ -19,11 +19,14 @@ export interface Veiculo {
   autonomiaKm: number;
 }
 
+export type DiasSemanaPadrao = 'DIARIAMENTE' | 'DIAS_UTEIS' | 'FINS_DE_SEMANA';
+
 export interface AgendamentoVeiculo {
   id: string;
   tipo: string;
   rotulo: string;
   hora: string | null;
+  diasSemana: DiasSemanaPadrao | null;
   ativo: boolean;
 }
 

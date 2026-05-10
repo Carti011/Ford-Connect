@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "../../hooks/useAuth";
 import { buscarVeiculo } from "../../services/veiculo";
 import { buscarAgendamentos, alternarAtivo } from "../../services/agendamento";
+import { calcularProximaPartida } from "../../utils/proximaPartida";
 import { VehicleHero } from "../../components/VehicleHero";
 import { SlideToStart } from "../../components/SlideToStart";
 import {
@@ -34,8 +35,6 @@ import { spacing } from "../../constants/spacing";
 import { radius } from "../../constants/radius";
 import { layout } from "../../constants/layout";
 
-// próxima partida ainda não tem backend (Sprint 2)
-const PROXIMA_PARTIDA = { dia: "Dom.", hora: "20:34" };
 
 export default function TelaHome() {
   const router = useRouter();
@@ -101,6 +100,7 @@ export default function TelaHome() {
   const modelo = veiculo
     ? `${veiculo.modelo}${veiculo.versao ? " " + veiculo.versao : ""}`
     : "—";
+  const proximaPartida = calcularProximaPartida(agendamentos);
 
   return (
     <View style={estilos.tela}>
@@ -174,8 +174,8 @@ export default function TelaHome() {
               <CalendarIcon size={15} color={colors.textDim} />
             </View>
             <View style={[estilos.statValores, estilos.statValoresDireita]}>
-              <Text style={estilos.statBig}>{PROXIMA_PARTIDA.dia}</Text>
-              <Text style={estilos.statSub}>{PROXIMA_PARTIDA.hora}</Text>
+              <Text style={estilos.statBig}>{proximaPartida?.dia ?? "—"}</Text>
+              <Text style={estilos.statSub}>{proximaPartida?.hora ?? "—"}</Text>
             </View>
           </View>
         </View>
