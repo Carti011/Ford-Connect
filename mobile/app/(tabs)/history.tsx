@@ -117,7 +117,7 @@ export default function TelaHistorico() {
         {/* top chrome */}
         <SafeAreaView edges={['top']} style={estilos.topChrome}>
           <Image source={require('../../assets/images/logo-ford.png')} style={estilos.logo} />
-          <Pressable onPress={() => router.push('/alerts')} style={estilos.avatarBtn}>
+          <Pressable onPress={() => router.push('/notificacoes')} style={estilos.avatarBtn}>
             <BellIcon size={20} color={colors.text} />
           </Pressable>
         </SafeAreaView>

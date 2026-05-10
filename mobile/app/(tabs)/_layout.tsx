@@ -41,10 +41,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <ClockIcon size={22} color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="alerts"
-        options={{ href: null }}
-      />
     </Tabs>
   );
 }

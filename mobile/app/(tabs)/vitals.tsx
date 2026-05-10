@@ -278,7 +278,7 @@ export default function TelaVitais() {
             style={estilos.logo}
           />
           <Pressable
-            onPress={() => router.push("/alerts")}
+            onPress={() => router.push("/notificacoes")}
             style={estilos.avatarBtn}
           >
             <BellIcon size={20} color={colors.text} />
