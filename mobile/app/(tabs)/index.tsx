@@ -214,6 +214,7 @@ export default function TelaHome() {
 
         {/* climatização */}
         <Pressable
+          onPress={() => router.push('/climatizacao')}
           style={({ pressed }) => [
             estilos.climaTile,
             pressed && estilos.climaTilePressed,
