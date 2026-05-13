@@ -2,6 +2,7 @@ package br.com.fordapp.controller;
 
 import br.com.fordapp.dto.AgendamentoVeiculoResponse;
 import br.com.fordapp.dto.AtualizarAgendamentoRequest;
+import br.com.fordapp.dto.CriarAgendamentoRequest;
 import br.com.fordapp.service.AgendamentoVeiculoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +36,18 @@ public class AgendamentoController {
     @PatchMapping("/agendamentos/{id}/ativo")
     public ResponseEntity<AgendamentoVeiculoResponse> alternarAtivo(@PathVariable UUID id) {
         return ResponseEntity.ok(agendamentoService.alternarAtivo(id));
+    }
+
+    @PostMapping("/veiculos/{id}/agendamentos")
+    public ResponseEntity<AgendamentoVeiculoResponse> criar(
+            @PathVariable UUID id,
+            @Valid @RequestBody CriarAgendamentoRequest request) {
+        return ResponseEntity.status(201).body(agendamentoService.criar(id, request));
+    }
+
+    @DeleteMapping("/agendamentos/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
+        agendamentoService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

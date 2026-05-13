@@ -30,6 +30,12 @@ public class AgendamentoVeiculo {
     @Column(nullable = false)
     private Boolean ativo;
 
+    @Column(name = "duracao_minutos")
+    private Integer duracaoMinutos;
+
+    @Column(name = "alvo_temperatura")
+    private Integer alvoTemperatura;
+
     public AgendamentoVeiculo() {}
 
     public UUID getId() { return id; }
@@ -39,6 +45,8 @@ public class AgendamentoVeiculo {
     public String getHora() { return hora; }
     public String getDiasSemana() { return diasSemana; }
     public Boolean getAtivo() { return ativo; }
+    public Integer getDuracaoMinutos() { return duracaoMinutos; }
+    public Integer getAlvoTemperatura() { return alvoTemperatura; }
 
     public void setId(UUID id) { this.id = id; }
     public void setVeiculo(Veiculo veiculo) { this.veiculo = veiculo; }
@@ -47,4 +55,6 @@ public class AgendamentoVeiculo {
     public void setHora(String hora) { this.hora = hora; }
     public void setDiasSemana(String diasSemana) { this.diasSemana = diasSemana; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
+    public void setDuracaoMinutos(Integer duracaoMinutos) { this.duracaoMinutos = duracaoMinutos; }
+    public void setAlvoTemperatura(Integer alvoTemperatura) { this.alvoTemperatura = alvoTemperatura; }
 }

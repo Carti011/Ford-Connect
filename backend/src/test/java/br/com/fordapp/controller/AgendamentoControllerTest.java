@@ -17,10 +17,14 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.springframework.http.MediaType;
@@ -62,7 +66,7 @@ class AgendamentoControllerTest {
         motor.setTipo("motor");
         motor.setRotulo("Ligar o motor · Dias úteis");
         motor.setHora("07:30");
-        motor.setDiasSemana("DIAS_UTEIS");
+        motor.setDiasSemana("1,2,3,4,5");
         motor.setAtivo(true);
 
         AgendamentoVeiculoResponse clima = new AgendamentoVeiculoResponse();
@@ -77,7 +81,7 @@ class AgendamentoControllerTest {
         mockMvc.perform(get("/api/veiculos/" + veiculoId + "/agendamentos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].tipo").value("motor"))
-                .andExpect(jsonPath("$[0].diasSemana").value("DIAS_UTEIS"))
+                .andExpect(jsonPath("$[0].diasSemana").value("1,2,3,4,5"))
                 .andExpect(jsonPath("$[0].ativo").value(true))
                 .andExpect(jsonPath("$[1].tipo").value("clima"))
                 .andExpect(jsonPath("$[1].ativo").value(false));
@@ -116,7 +120,7 @@ class AgendamentoControllerTest {
     void deveRetornar401SemTokenNoPatchAtualizar() throws Exception {
         mockMvc.perform(patch("/api/agendamentos/" + UUID.randomUUID()).with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"hora\":\"09:00\",\"diasSemana\":\"FINS_DE_SEMANA\"}"))
+                        .content("{\"hora\":\"09:00\",\"diasSemana\":\"0,6\"}"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -129,17 +133,17 @@ class AgendamentoControllerTest {
         response.setId(id);
         response.setTipo("motor");
         response.setHora("09:00");
-        response.setDiasSemana("FINS_DE_SEMANA");
+        response.setDiasSemana("0,6");
         response.setAtivo(true);
 
         when(agendamentoService.atualizar(eq(id), any())).thenReturn(response);
 
         mockMvc.perform(patch("/api/agendamentos/" + id).with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"hora\":\"09:00\",\"diasSemana\":\"FINS_DE_SEMANA\"}"))
+                        .content("{\"hora\":\"09:00\",\"diasSemana\":\"0,6\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hora").value("09:00"))
-                .andExpect(jsonPath("$.diasSemana").value("FINS_DE_SEMANA"));
+                .andExpect(jsonPath("$.diasSemana").value("0,6"));
     }
 
     @Test
@@ -147,7 +151,106 @@ class AgendamentoControllerTest {
     void deveRetornar400ComBodyInvalido() throws Exception {
         mockMvc.perform(patch("/api/agendamentos/" + UUID.randomUUID()).with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"hora\":\"25:99\",\"diasSemana\":\"FINS_DE_SEMANA\"}"))
+                        .content("{\"hora\":\"25:99\",\"diasSemana\":\"1,2,3\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deveRetornar401SemTokenNoCriar() throws Exception {
+        mockMvc.perform(post("/api/veiculos/" + UUID.randomUUID() + "/agendamentos").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"tipo\":\"motor\",\"rotulo\":\"Ligar o motor\",\"hora\":\"07:00\",\"diasSemana\":\"1,2,3,4,5\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void deveRetornar201AoCriarAgendamento() throws Exception {
+        UUID veiculoId = UUID.randomUUID();
+
+        AgendamentoVeiculoResponse response = new AgendamentoVeiculoResponse();
+        response.setId(UUID.randomUUID());
+        response.setTipo("motor");
+        response.setRotulo("Ligar o motor");
+        response.setHora("07:00");
+        response.setDiasSemana("1,2,3,4,5");
+        response.setAtivo(false);
+
+        when(agendamentoService.criar(eq(veiculoId), any())).thenReturn(response);
+
+        mockMvc.perform(post("/api/veiculos/" + veiculoId + "/agendamentos").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"tipo\":\"motor\",\"rotulo\":\"Ligar o motor\",\"hora\":\"07:00\",\"diasSemana\":\"1,2,3,4,5\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.tipo").value("motor"))
+                .andExpect(jsonPath("$.hora").value("07:00"))
+                .andExpect(jsonPath("$.diasSemana").value("1,2,3,4,5"));
+    }
+
+    @Test
+    @WithMockUser
+    void deveRetornar400AoCriarComBodyInvalido() throws Exception {
+        mockMvc.perform(post("/api/veiculos/" + UUID.randomUUID() + "/agendamentos").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"hora\":\"25:99\",\"diasSemana\":\"1,2,3,4,5\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deveRetornar401SemTokenNoDeletar() throws Exception {
+        mockMvc.perform(delete("/api/agendamentos/" + UUID.randomUUID()).with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void deveRetornar204AoDeletar() throws Exception {
+        UUID id = UUID.randomUUID();
+        doNothing().when(agendamentoService).deletar(id);
+
+        mockMvc.perform(delete("/api/agendamentos/" + id).with(csrf()))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockUser
+    void deveRetornar404AoDeletarInexistente() throws Exception {
+        UUID id = UUID.randomUUID();
+        doThrow(new NoSuchElementException("Agendamento não encontrado"))
+                .when(agendamentoService).deletar(id);
+
+        mockMvc.perform(delete("/api/agendamentos/" + id).with(csrf()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem").value("Agendamento não encontrado"));
+    }
+
+    @Test
+    @WithMockUser
+    void deveAtualizarDuracaoEAlvoNoPatch() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        AgendamentoVeiculoResponse response = new AgendamentoVeiculoResponse();
+        response.setId(id);
+        response.setTipo("motor");
+        response.setDuracaoMinutos(20);
+        response.setAlvoTemperatura(25);
+
+        when(agendamentoService.atualizar(eq(id), any())).thenReturn(response);
+
+        mockMvc.perform(patch("/api/agendamentos/" + id).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"duracaoMinutos\":20,\"alvoTemperatura\":25}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.duracaoMinutos").value(20))
+                .andExpect(jsonPath("$.alvoTemperatura").value(25));
+    }
+
+    @Test
+    @WithMockUser
+    void deveRetornar400ComAlvoForaDoRange() throws Exception {
+        mockMvc.perform(patch("/api/agendamentos/" + UUID.randomUUID()).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"alvoTemperatura\":50}"))
                 .andExpect(status().isBadRequest());
     }
 }

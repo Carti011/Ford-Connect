@@ -1,5 +1,6 @@
 package br.com.fordapp.service;
 
+import br.com.fordapp.dto.AtualizarPreferenciasRequest;
 import br.com.fordapp.dto.VeiculoResponse;
 import br.com.fordapp.model.Usuario;
 import br.com.fordapp.model.Veiculo;
@@ -78,6 +79,37 @@ class VeiculoServiceTest {
         when(veiculoRepository.findById(idInexistente)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> veiculoService.buscarPorId(idInexistente))
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void deveAtualizarPreferenciasDoVeiculo() {
+        veiculo.setClimatizacaoAutomatica(true);
+        veiculo.setDesembacarParabrisa(true);
+        veiculo.setBancoAquecido(false);
+        veiculo.setNotificar(true);
+
+        AtualizarPreferenciasRequest request = new AtualizarPreferenciasRequest();
+        request.setClimatizacaoAutomatica(false);
+        request.setBancoAquecido(true);
+
+        when(veiculoRepository.findById(veiculo.getId())).thenReturn(Optional.of(veiculo));
+        when(veiculoRepository.save(veiculo)).thenReturn(veiculo);
+
+        VeiculoResponse response = veiculoService.atualizarPreferencias(veiculo.getId(), request);
+
+        assertThat(response.getClimatizacaoAutomatica()).isFalse();
+        assertThat(response.getDesembacarParabrisa()).isTrue();
+        assertThat(response.getBancoAquecido()).isTrue();
+        assertThat(response.getNotificar()).isTrue();
+    }
+
+    @Test
+    void deveLancarExcecaoAoAtualizarPreferenciasDeVeiculoInexistente() {
+        UUID idInexistente = UUID.randomUUID();
+        when(veiculoRepository.findById(idInexistente)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> veiculoService.atualizarPreferencias(idInexistente, new AtualizarPreferenciasRequest()))
                 .isInstanceOf(NoSuchElementException.class);
     }
 }

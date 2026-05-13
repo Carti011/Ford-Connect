@@ -16,6 +16,10 @@ public class VeiculoResponse {
     private String statusVeiculo;
     private Integer nivelCombustivel;
     private Integer autonomiaKm;
+    private Boolean climatizacaoAutomatica;
+    private Boolean desembacarParabrisa;
+    private Boolean bancoAquecido;
+    private Boolean notificar;
 
     public VeiculoResponse() {}
 
@@ -32,6 +36,10 @@ public class VeiculoResponse {
         dto.statusVeiculo = veiculo.getStatusVeiculo();
         dto.nivelCombustivel = veiculo.getNivelCombustivel();
         dto.autonomiaKm = veiculo.getAutonomiaKm();
+        dto.climatizacaoAutomatica = veiculo.getClimatizacaoAutomatica();
+        dto.desembacarParabrisa = veiculo.getDesembacarParabrisa();
+        dto.bancoAquecido = veiculo.getBancoAquecido();
+        dto.notificar = veiculo.getNotificar();
         return dto;
     }
 
@@ -46,6 +54,10 @@ public class VeiculoResponse {
     public String getStatusVeiculo() { return statusVeiculo; }
     public Integer getNivelCombustivel() { return nivelCombustivel; }
     public Integer getAutonomiaKm() { return autonomiaKm; }
+    public Boolean getClimatizacaoAutomatica() { return climatizacaoAutomatica; }
+    public Boolean getDesembacarParabrisa() { return desembacarParabrisa; }
+    public Boolean getBancoAquecido() { return bancoAquecido; }
+    public Boolean getNotificar() { return notificar; }
 
     public void setId(UUID id) { this.id = id; }
     public void setNomeProprietario(String nomeProprietario) { this.nomeProprietario = nomeProprietario; }
@@ -58,4 +70,8 @@ public class VeiculoResponse {
     public void setStatusVeiculo(String statusVeiculo) { this.statusVeiculo = statusVeiculo; }
     public void setNivelCombustivel(Integer nivelCombustivel) { this.nivelCombustivel = nivelCombustivel; }
     public void setAutonomiaKm(Integer autonomiaKm) { this.autonomiaKm = autonomiaKm; }
+    public void setClimatizacaoAutomatica(Boolean climatizacaoAutomatica) { this.climatizacaoAutomatica = climatizacaoAutomatica; }
+    public void setDesembacarParabrisa(Boolean desembacarParabrisa) { this.desembacarParabrisa = desembacarParabrisa; }
+    public void setBancoAquecido(Boolean bancoAquecido) { this.bancoAquecido = bancoAquecido; }
+    public void setNotificar(Boolean notificar) { this.notificar = notificar; }
 }

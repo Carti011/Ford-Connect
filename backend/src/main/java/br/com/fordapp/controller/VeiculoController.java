@@ -1,5 +1,6 @@
 package br.com.fordapp.controller;
 
+import br.com.fordapp.dto.AtualizarPreferenciasRequest;
 import br.com.fordapp.dto.VeiculoResponse;
 import br.com.fordapp.service.VeiculoService;
 import org.springframework.http.ResponseEntity;
@@ -20,5 +21,12 @@ public class VeiculoController {
     @GetMapping("/{id}")
     ResponseEntity<VeiculoResponse> buscarPorId(@PathVariable UUID id) {
         return ResponseEntity.ok(veiculoService.buscarPorId(id));
+    }
+
+    @PatchMapping("/{id}/preferencias")
+    ResponseEntity<VeiculoResponse> atualizarPreferencias(
+            @PathVariable UUID id,
+            @RequestBody AtualizarPreferenciasRequest request) {
+        return ResponseEntity.ok(veiculoService.atualizarPreferencias(id, request));
     }
 }

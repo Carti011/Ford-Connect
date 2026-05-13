@@ -11,6 +11,8 @@ public class AgendamentoVeiculoResponse {
     private String hora;
     private String diasSemana;
     private Boolean ativo;
+    private Integer duracaoMinutos;
+    private Integer alvoTemperatura;
 
     public AgendamentoVeiculoResponse() {}
 
@@ -22,6 +24,8 @@ public class AgendamentoVeiculoResponse {
         dto.hora = agendamento.getHora();
         dto.diasSemana = agendamento.getDiasSemana();
         dto.ativo = agendamento.getAtivo();
+        dto.duracaoMinutos = agendamento.getDuracaoMinutos();
+        dto.alvoTemperatura = agendamento.getAlvoTemperatura();
         return dto;
     }
 
@@ -31,6 +35,8 @@ public class AgendamentoVeiculoResponse {
     public String getHora() { return hora; }
     public String getDiasSemana() { return diasSemana; }
     public Boolean getAtivo() { return ativo; }
+    public Integer getDuracaoMinutos() { return duracaoMinutos; }
+    public Integer getAlvoTemperatura() { return alvoTemperatura; }
 
     public void setId(UUID id) { this.id = id; }
     public void setTipo(String tipo) { this.tipo = tipo; }
@@ -38,4 +44,6 @@ public class AgendamentoVeiculoResponse {
     public void setHora(String hora) { this.hora = hora; }
     public void setDiasSemana(String diasSemana) { this.diasSemana = diasSemana; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
+    public void setDuracaoMinutos(Integer duracaoMinutos) { this.duracaoMinutos = duracaoMinutos; }
+    public void setAlvoTemperatura(Integer alvoTemperatura) { this.alvoTemperatura = alvoTemperatura; }
 }

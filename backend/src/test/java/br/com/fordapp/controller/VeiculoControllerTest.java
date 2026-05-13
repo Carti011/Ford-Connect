@@ -14,9 +14,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.springframework.http.MediaType;
 
 @WebMvcTest(VeiculoController.class)
 class VeiculoControllerTest {
@@ -86,5 +92,36 @@ class VeiculoControllerTest {
         mockMvc.perform(get("/api/veiculos/" + id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.mensagem").value("Veículo não encontrado"));
+    }
+
+    @Test
+    void deveRetornar401SemTokenNoPatchPreferencias() throws Exception {
+        mockMvc.perform(patch("/api/veiculos/" + UUID.randomUUID() + "/preferencias").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"climatizacaoAutomatica\":false}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser
+    void deveAtualizarPreferenciasDoVeiculo() throws Exception {
+        UUID id = UUID.randomUUID();
+        VeiculoResponse response = new VeiculoResponse();
+        response.setId(id);
+        response.setClimatizacaoAutomatica(false);
+        response.setDesembacarParabrisa(true);
+        response.setBancoAquecido(true);
+        response.setNotificar(false);
+
+        when(veiculoService.atualizarPreferencias(eq(id), any())).thenReturn(response);
+
+        mockMvc.perform(patch("/api/veiculos/" + id + "/preferencias").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"climatizacaoAutomatica\":false,\"bancoAquecido\":true,\"notificar\":false}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.climatizacaoAutomatica").value(false))
+                .andExpect(jsonPath("$.desembacarParabrisa").value(true))
+                .andExpect(jsonPath("$.bancoAquecido").value(true))
+                .andExpect(jsonPath("$.notificar").value(false));
     }
 }
