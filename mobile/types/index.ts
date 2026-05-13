@@ -17,17 +17,28 @@ export interface Veiculo {
   statusVeiculo: string;
   nivelCombustivel: number;
   autonomiaKm: number;
+  climatizacaoAutomatica: boolean;
+  desembacarParabrisa: boolean;
+  bancoAquecido: boolean;
+  notificar: boolean;
 }
 
-export type DiasSemanaPadrao = 'DIARIAMENTE' | 'DIAS_UTEIS' | 'FINS_DE_SEMANA';
+export interface PreferenciasVeiculo {
+  climatizacaoAutomatica?: boolean;
+  desembacarParabrisa?: boolean;
+  bancoAquecido?: boolean;
+  notificar?: boolean;
+}
 
 export interface AgendamentoVeiculo {
   id: string;
   tipo: string;
   rotulo: string;
   hora: string | null;
-  diasSemana: DiasSemanaPadrao | null;
+  diasSemana: string | null; // dias separados por vírgula: "1,2,3,4,5" (0=Dom,...,6=Sáb)
   ativo: boolean;
+  duracaoMinutos: number | null;
+  alvoTemperatura: number | null;
 }
 
 export interface RegistroManutencao {

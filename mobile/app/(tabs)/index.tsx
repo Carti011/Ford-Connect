@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
+import { useFocusEffect } from "expo-router";
 import {
   View,
   Text,
@@ -85,9 +86,7 @@ export default function TelaHome() {
     }
   }
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  useFocusEffect(useCallback(() => { carregar(); }, [carregar]));
 
   if (carregando) {
     return (
@@ -101,6 +100,13 @@ export default function TelaHome() {
     ? `${veiculo.modelo}${veiculo.versao ? " " + veiculo.versao : ""}`
     : "—";
   const proximaPartida = calcularProximaPartida(agendamentos);
+
+  const ordemTipos = ["motor", "clima", "revisao"];
+  const agendamentosOrdenados = [...agendamentos].sort((a, b) => {
+    const ia = ordemTipos.indexOf(a.tipo);
+    const ib = ordemTipos.indexOf(b.tipo);
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+  });
 
   return (
     <View style={estilos.tela}>
@@ -244,12 +250,12 @@ export default function TelaHome() {
             <Text style={estilos.agendarTitulo}>Agendar</Text>
             <Text style={estilos.agendarPlus}>+</Text>
           </Pressable>
-          {agendamentos.map((item, idx) => (
+          {agendamentosOrdenados.map((item, idx) => (
             <View
               key={item.id}
               style={[
                 estilos.agendarRow,
-                idx < agendamentos.length - 1 && estilos.agendarRowBorder,
+                idx < agendamentosOrdenados.length - 1 && estilos.agendarRowBorder,
               ]}
             >
               {item.hora ? (
