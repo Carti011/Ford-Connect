@@ -1,6 +1,6 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  View, Text, Pressable, StyleSheet, ScrollView, Switch, PanResponder,
+  View, Text, Pressable, StyleSheet, ScrollView, Switch, PanResponder, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -8,12 +8,18 @@ import { useRouter } from 'expo-router';
 import Svg, { Path, Circle, Line, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useAuth } from '../hooks/useAuth';
 import { buscarVeiculo } from '../services/veiculo';
-import { Veiculo } from '../types';
+import {
+  buscarClimatizacao,
+  atualizarClimatizacao,
+  atualizarZonaClimatizacao,
+  AtualizarClimatizacaoBody,
+} from '../services/climatizacao';
+import { EstadoClimatizacao, ModoClimatizacao, Veiculo } from '../types';
 import { colors } from '../constants/colors';
 import { typography } from '../constants/typography';
 import { spacing } from '../constants/spacing';
 import { radius } from '../constants/radius';
-import { ChevronLeftIcon, PowerIcon, CaretIcon } from '../components/icons';
+import { ChevronLeftIcon, PowerIcon, CaretIcon, FanIcon } from '../components/icons';
 
 // ─── constantes do discador ───────────────────────────────────
 const DS = 300;
@@ -71,17 +77,6 @@ function DefrostIcon({ size = 20, color = '#fff' }: { size?: number; color?: str
   );
 }
 
-function SlidersIcon({ size = 20, color = '#fff' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path d="M4 5h16M4 12h16M4 19h16" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-      <Circle cx="9" cy="5" r="2.5" fill={colors.bg} stroke={color} strokeWidth="1.5" />
-      <Circle cx="15" cy="12" r="2.5" fill={colors.bg} stroke={color} strokeWidth="1.5" />
-      <Circle cx="9" cy="19" r="2.5" fill={colors.bg} stroke={color} strokeWidth="1.5" />
-    </Svg>
-  );
-}
-
 function ThermometerIcon({ size = 18, color = '#fff' }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -95,9 +90,11 @@ function ThermometerIcon({ size = 18, color = '#fff' }: { size?: number; color?:
 interface DiscadorProps {
   temperatura: number;
   onChange: (t: number) => void;
+  temperaturaInterna: number;
+  temperaturaExterna: number;
 }
 
-function Discador({ temperatura, onChange }: DiscadorProps) {
+function Discador({ temperatura, onChange, temperaturaInterna, temperaturaExterna }: DiscadorProps) {
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
@@ -201,47 +198,164 @@ function Discador({ temperatura, onChange }: DiscadorProps) {
           {temperatura}
           <Text style={estilos.tempUnidade}>°C</Text>
         </Text>
-        <Text style={estilos.tempInfo}>Externa: 31° · Interna: 28°</Text>
+        <Text style={estilos.tempInfo}>Externa: {temperaturaExterna}° · Interna: {temperaturaInterna}°</Text>
       </View>
     </View>
   );
 }
 
 // ─── tela principal ───────────────────────────────────────────
-type Modo = 'ac' | 'aquecedor' | 'desembacador';
-
-const MODOS = [
-  { id: 'ac' as Modo,           label: 'A/C',        Icone: SnowflakeIcon },
-  { id: 'aquecedor' as Modo,    label: 'Aquecedor',   Icone: SunIcon      },
-  { id: 'desembacador' as Modo, label: 'Desembaçar',  Icone: DefrostIcon  },
+const MODOS: { id: ModoClimatizacao; label: string; Icone: typeof SnowflakeIcon }[] = [
+  { id: 'ac',           label: 'A/C',        Icone: SnowflakeIcon },
+  { id: 'aquecedor',    label: 'Aquecedor',  Icone: SunIcon      },
+  { id: 'desembacador', label: 'Desembaçar', Icone: DefrostIcon  },
 ];
 
 const ALTURAS_BARRA = [8, 11, 14, 17, 20, 23];
+
+const DEBOUNCE_PATCH_MS = 400;
 
 export default function TelaClimatizacao() {
   const router = useRouter();
   const { idVeiculo } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
-  const [temperatura, setTemperatura] = useState(22);
-  const [sistemaLigado, setSistemaLigado] = useState(true);
-  const [modo, setModo] = useState<Modo>('ac');
-  const [velocidade, setVelocidade] = useState(4);
+  const [estado, setEstado] = useState<EstadoClimatizacao | null>(null);
+  const [carregando, setCarregando] = useState(true);
+
+  // debounce do estado (velocidade) e debounce da temperatura da zona ativa (discador)
+  // separados porque batem em endpoints diferentes
+  const patchEstadoPendenteRef = useRef<AtualizarClimatizacaoBody>({});
+  const timerEstadoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tempZonaPendenteRef = useRef<{ zonaId: string; temperatura: number } | null>(null);
+  const timerZonaRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const carregar = useCallback(async () => {
     if (!idVeiculo) return;
-    try { setVeiculo(await buscarVeiculo(idVeiculo)); } catch { /* silencioso */ }
+    try {
+      const [v, c] = await Promise.all([
+        buscarVeiculo(idVeiculo),
+        buscarClimatizacao(idVeiculo),
+      ]);
+      setVeiculo(v);
+      setEstado(c);
+    } finally {
+      setCarregando(false);
+    }
   }, [idVeiculo]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
+  // ao desmontar, cancela debounces pendentes
+  useEffect(() => () => {
+    if (timerEstadoRef.current) clearTimeout(timerEstadoRef.current);
+    if (timerZonaRef.current) clearTimeout(timerZonaRef.current);
+  }, []);
+
+  // PATCH imediato — para toques discretos (toggle, modo)
+  async function patchEstadoImediato(patch: AtualizarClimatizacaoBody) {
+    if (!estado || !idVeiculo) return;
+    const anterior = estado;
+    setEstado(prev => prev ? { ...prev, ...patch } : prev);
+    try {
+      const atualizado = await atualizarClimatizacao(idVeiculo, patch);
+      setEstado(atualizado);
+    } catch {
+      setEstado(anterior);
+    }
+  }
+
+  // PATCH debounced do estado — usado pela velocidade do ventilador
+  function patchEstadoDebounced(patch: AtualizarClimatizacaoBody) {
+    setEstado(prev => prev ? { ...prev, ...patch } : prev);
+    patchEstadoPendenteRef.current = { ...patchEstadoPendenteRef.current, ...patch };
+    if (timerEstadoRef.current) clearTimeout(timerEstadoRef.current);
+    timerEstadoRef.current = setTimeout(async () => {
+      if (!idVeiculo) return;
+      const body = patchEstadoPendenteRef.current;
+      patchEstadoPendenteRef.current = {};
+      try {
+        const atualizado = await atualizarClimatizacao(idVeiculo, body);
+        setEstado(atualizado);
+      } catch { /* mantém estado otimista local */ }
+    }, DEBOUNCE_PATCH_MS);
+  }
+
+  // PATCH debounced da temperatura da zona — usado pelo discador (alvo: zona ativa)
+  function ajustarTemperaturaZonaAtiva(novaTemperatura: number) {
+    if (!estado || !idVeiculo) return;
+    const zonaAlvo = estado.zonas.find(z => z.ativa) ?? estado.zonas[0];
+    if (!zonaAlvo) return;
+
+    setEstado(prev => prev ? {
+      ...prev,
+      zonas: prev.zonas.map(z => z.id === zonaAlvo.id ? { ...z, temperatura: novaTemperatura } : z),
+    } : prev);
+
+    tempZonaPendenteRef.current = { zonaId: zonaAlvo.id, temperatura: novaTemperatura };
+    if (timerZonaRef.current) clearTimeout(timerZonaRef.current);
+    timerZonaRef.current = setTimeout(async () => {
+      const pendente = tempZonaPendenteRef.current;
+      tempZonaPendenteRef.current = null;
+      if (!pendente) return;
+      try {
+        const atualizada = await atualizarZonaClimatizacao(idVeiculo, pendente.zonaId, {
+          temperatura: pendente.temperatura,
+        });
+        setEstado(prev => prev ? {
+          ...prev,
+          zonas: prev.zonas.map(z => z.id === atualizada.id ? atualizada : z),
+        } : prev);
+      } catch { /* mantém estado otimista local */ }
+    }, DEBOUNCE_PATCH_MS);
+  }
+
+  async function toggleZonaAtiva(zonaId: string) {
+    if (!estado || !idVeiculo) return;
+    const zonaAtual = estado.zonas.find(z => z.id === zonaId);
+    if (!zonaAtual) return;
+    const anterior = estado;
+    const novaAtiva = !zonaAtual.ativa;
+    setEstado(prev => prev ? {
+      ...prev,
+      zonas: prev.zonas.map(z => z.id === zonaId ? { ...z, ativa: novaAtiva } : z),
+    } : prev);
+    try {
+      const zonaAtualizada = await atualizarZonaClimatizacao(idVeiculo, zonaId, { ativa: novaAtiva });
+      setEstado(prev => prev ? {
+        ...prev,
+        zonas: prev.zonas.map(z => z.id === zonaId ? zonaAtualizada : z),
+      } : prev);
+    } catch {
+      setEstado(anterior);
+    }
+  }
+
+  if (carregando || !estado) {
+    return (
+      <View style={estilos.tela}>
+        <StatusBar style="light" />
+        <SafeAreaView edges={['top']} style={estilos.header}>
+          <Pressable
+            onPress={() => router.back()}
+            style={({ pressed }) => [estilos.headerBtn, pressed && estilos.headerBtnPressed]}
+          >
+            <Text style={estilos.fecharX}>✕</Text>
+          </Pressable>
+          <Text style={estilos.headerTitulo}>Climatização</Text>
+          <View style={estilos.headerEnfeite} pointerEvents="none">
+            <FanIcon size={17} color={colors.textDim} />
+          </View>
+        </SafeAreaView>
+        <View style={estilos.loadingContainer}>
+          <ActivityIndicator color={colors.accent} size="large" />
+        </View>
+      </View>
+    );
+  }
+
   const modelo = veiculo
     ? `${veiculo.modelo}${veiculo.versao ? ' ' + veiculo.versao : ''}`
     : 'Ranger';
-
-  const zonas = [
-    { id: 'motorista',  label: 'Motorista',  temp: temperatura, ativo: true  },
-    { id: 'passageiro', label: 'Passageiro', temp: 20,          ativo: false },
-  ];
 
   return (
     <View style={estilos.tela}>
@@ -256,9 +370,9 @@ export default function TelaClimatizacao() {
           <Text style={estilos.fecharX}>✕</Text>
         </Pressable>
         <Text style={estilos.headerTitulo}>Climatização</Text>
-        <Pressable style={({ pressed }) => [estilos.headerBtn, pressed && estilos.headerBtnPressed]}>
-          <SlidersIcon size={17} color={colors.text} />
-        </Pressable>
+        <View style={estilos.headerEnfeite} pointerEvents="none">
+          <FanIcon size={17} color={colors.textDim} />
+        </View>
       </SafeAreaView>
 
       <ScrollView
@@ -271,36 +385,41 @@ export default function TelaClimatizacao() {
           <Text style={estilos.tituloPrincipal}>Pré-condicionar{'\n'}cabine</Text>
         </View>
 
-        {/* discador */}
+        {/* discador — controla a temperatura da zona atualmente ativa */}
         <View style={estilos.discadorWrap}>
-          <Discador temperatura={temperatura} onChange={setTemperatura} />
+          <Discador
+            temperatura={(estado.zonas.find(z => z.ativa) ?? estado.zonas[0])?.temperatura ?? 22}
+            onChange={ajustarTemperaturaZonaAtiva}
+            temperaturaInterna={estado.temperaturaInterna}
+            temperaturaExterna={estado.temperaturaExterna}
+          />
         </View>
 
         {/* card sistema ligado */}
         <Pressable
-          onPress={() => setSistemaLigado(v => !v)}
+          onPress={() => patchEstadoImediato({ sistemaLigado: !estado.sistemaLigado })}
           style={({ pressed }) => [
             estilos.sistemaCard,
-            sistemaLigado && estilos.sistemaCardOn,
+            estado.sistemaLigado && estilos.sistemaCardOn,
             pressed && estilos.sistemaCardPressed,
           ]}
         >
-          <View style={[estilos.sistemaIcone, sistemaLigado && estilos.sistemaIconeOn]}>
-            <PowerIcon size={20} color={sistemaLigado ? colors.accent : colors.textDim} />
+          <View style={[estilos.sistemaIcone, estado.sistemaLigado && estilos.sistemaIconeOn]}>
+            <PowerIcon size={20} color={estado.sistemaLigado ? colors.accent : colors.textDim} />
           </View>
           <View style={estilos.sistemaTextos}>
-            <Text style={[estilos.sistemaTitulo, sistemaLigado && estilos.sistemaTituloOn]}>
-              {sistemaLigado ? 'Sistema ligado' : 'Sistema desligado'}
+            <Text style={[estilos.sistemaTitulo, estado.sistemaLigado && estilos.sistemaTituloOn]}>
+              {estado.sistemaLigado ? 'Sistema ligado' : 'Sistema desligado'}
             </Text>
-            <Text style={[estilos.sistemaSubtitulo, sistemaLigado && estilos.sistemaSubtituloOn]}>
-              {sistemaLigado ? 'Ativo há 4 min · Auto' : 'Toque para ligar'}
+            <Text style={[estilos.sistemaSubtitulo, estado.sistemaLigado && estilos.sistemaSubtituloOn]}>
+              {estado.sistemaLigado ? 'Ativo · Auto' : 'Toque para ligar'}
             </Text>
           </View>
           <Switch
-            value={sistemaLigado}
-            onValueChange={setSistemaLigado}
+            value={estado.sistemaLigado}
+            onValueChange={(v) => patchEstadoImediato({ sistemaLigado: v })}
             trackColor={{ false: colors.surfaceHi, true: 'rgba(255,255,255,0.45)' }}
-            thumbColor={sistemaLigado ? '#FFFFFF' : colors.textMuted}
+            thumbColor={estado.sistemaLigado ? '#FFFFFF' : colors.textMuted}
             ios_backgroundColor={colors.surfaceHi}
           />
         </Pressable>
@@ -308,11 +427,11 @@ export default function TelaClimatizacao() {
         {/* modos */}
         <View style={estilos.modos}>
           {MODOS.map(({ id, label, Icone }) => {
-            const ativo = modo === id;
+            const ativo = estado.modo === id;
             return (
               <Pressable
                 key={id}
-                onPress={() => setModo(id)}
+                onPress={() => patchEstadoImediato({ modo: id })}
                 style={({ pressed }) => [
                   estilos.modoBotao,
                   ativo && estilos.modoBotaoAtivo,
@@ -332,16 +451,17 @@ export default function TelaClimatizacao() {
         <View style={estilos.ventCard}>
           <View style={estilos.ventHeader}>
             <Text style={estilos.ventLabel}>Velocidade do ventilador</Text>
-            <Text style={estilos.ventValor}>{velocidade} / 6</Text>
+            <Text style={estilos.ventValor}>{estado.velocidadeVentilador} / 6</Text>
           </View>
           <View style={estilos.ventBarras}>
             {ALTURAS_BARRA.map((h, i) => {
               const nivel = i + 1;
-              const ativo = nivel <= velocidade;
+              const ativo = nivel <= estado.velocidadeVentilador;
               return (
                 <Pressable
                   key={nivel}
-                  onPress={() => setVelocidade(nivel)}
+                  testID={`ventilador-barra-${nivel}`}
+                  onPress={() => patchEstadoDebounced({ velocidadeVentilador: nivel })}
                   style={[
                     estilos.ventBarra,
                     { height: h },
@@ -357,23 +477,24 @@ export default function TelaClimatizacao() {
         <View style={estilos.zonasSecao}>
           <Text style={estilos.zonasTitulo}>ZONAS</Text>
           <View style={estilos.zonasCard}>
-            {zonas.map((zona, idx) => (
+            {estado.zonas.map((zona, idx) => (
               <Pressable
                 key={zona.id}
+                onPress={() => toggleZonaAtiva(zona.id)}
                 style={({ pressed }) => [
                   estilos.zonaRow,
-                  idx < zonas.length - 1 && estilos.zonaRowBorder,
+                  idx < estado.zonas.length - 1 && estilos.zonaRowBorder,
                   pressed && estilos.zonaRowPressed,
                 ]}
               >
-                <View style={[estilos.zonaIcone, zona.ativo && estilos.zonaIconeAtivo]}>
-                  <ThermometerIcon size={17} color={zona.ativo ? colors.accent : colors.textDim} />
+                <View style={[estilos.zonaIcone, zona.ativa && estilos.zonaIconeAtivo]}>
+                  <ThermometerIcon size={17} color={zona.ativa ? colors.accent : colors.textDim} />
                 </View>
                 <View style={estilos.zonaTextos}>
-                  <Text style={estilos.zonaLabel}>{zona.label}</Text>
-                  <Text style={estilos.zonaTemp}>{zona.temp} °C</Text>
+                  <Text style={estilos.zonaLabel}>{zona.rotulo}</Text>
+                  <Text style={estilos.zonaTemp}>{zona.temperatura} °C</Text>
                 </View>
-                {zona.ativo && (
+                {zona.ativa && (
                   <View style={estilos.ativaBadge}>
                     <Text style={estilos.ativaBadgeTexto}>ATIVA</Text>
                   </View>
@@ -395,6 +516,12 @@ const estilos = StyleSheet.create({
   tela: {
     flex: 1,
     backgroundColor: colors.bg,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // header
@@ -428,6 +555,12 @@ const estilos = StyleSheet.create({
   headerBtnPressed: {
     backgroundColor: colors.surface,
     transform: [{ scale: 0.95 }],
+  },
+  headerEnfeite: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   fecharX: {
     fontSize: 16,

@@ -51,6 +51,27 @@ export interface RegistroManutencao {
   custo: number;
 }
 
+export type ModoClimatizacao = 'ac' | 'aquecedor' | 'desembacador';
+
+export interface ZonaClimatizacao {
+  id: string;
+  rotulo: string;
+  temperatura: number;
+  ativa: boolean;
+  ordem: number;
+}
+
+export interface EstadoClimatizacao {
+  id: string;
+  veiculoId: string;
+  sistemaLigado: boolean;
+  modo: ModoClimatizacao;
+  velocidadeVentilador: number;
+  temperaturaInterna: number;
+  temperaturaExterna: number;
+  zonas: ZonaClimatizacao[];
+}
+
 export type Prioridade = 'baixa' | 'media' | 'alta';
 
 export interface AlertaRevisao {
