@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
+import { useFocusEffect } from "expo-router";
 import {
   View,
   Text,
@@ -14,6 +15,8 @@ import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../hooks/useAuth";
 import { buscarVeiculo } from "../../services/veiculo";
+import { buscarAgendamentos, alternarAtivo } from "../../services/agendamento";
+import { calcularProximaPartida } from "../../utils/proximaPartida";
 import { VehicleHero } from "../../components/VehicleHero";
 import { SlideToStart } from "../../components/SlideToStart";
 import {
@@ -26,58 +29,21 @@ import {
   FanIcon,
   BellIcon,
 } from "../../components/icons";
-import { Veiculo } from "../../types";
+import { Veiculo, AgendamentoVeiculo } from "../../types";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import { spacing } from "../../constants/spacing";
 import { radius } from "../../constants/radius";
 import { layout } from "../../constants/layout";
 
-// ─── dados hardcoded enquanto backend não expõe ──────────────
-const PLACEHOLDER = {
-  status: "Estacionado",
-  localizacao: "Localização",
-  combustivel: "80%",
-  autonomia: "400 km",
-  proximaDia: "Dom.",
-  proximaHora: "20:34",
-};
-
-// ─── agendamentos (placeholder — sem backend) ─────────────────
-const AGENDAMENTOS_INICIAL = [
-  {
-    id: "motor",
-    hora: "07:30",
-    label: "Ligar o motor · Dias úteis",
-    ativo: true,
-  },
-  {
-    id: "clima",
-    hora: "08:00",
-    label: "Climatização automática",
-    ativo: false,
-  },
-  {
-    id: "revisao",
-    hora: "",
-    label: "Lembrete de revisão pendente",
-    ativo: true,
-  },
-];
 
 export default function TelaHome() {
   const router = useRouter();
   const { idVeiculo } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
+  const [agendamentos, setAgendamentos] = useState<AgendamentoVeiculo[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
-  const [agendamentos, setAgendamentos] = useState(AGENDAMENTOS_INICIAL);
-
-  function toggleAgendamento(id: string) {
-    setAgendamentos((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, ativo: !a.ativo } : a)),
-    );
-  }
 
   const carregar = useCallback(async () => {
     if (!idVeiculo) {
@@ -87,7 +53,12 @@ export default function TelaHome() {
     setCarregando(true);
     setErro(null);
     try {
-      setVeiculo(await buscarVeiculo(idVeiculo));
+      const [v, ags] = await Promise.all([
+        buscarVeiculo(idVeiculo),
+        buscarAgendamentos(idVeiculo),
+      ]);
+      setVeiculo(v);
+      setAgendamentos(ags);
     } catch (e: any) {
       setErro(
         e?.response?.status === 401
@@ -99,9 +70,23 @@ export default function TelaHome() {
     }
   }, [idVeiculo]);
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  async function toggleAgendamento(id: string) {
+    setAgendamentos((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, ativo: !a.ativo } : a)),
+    );
+    try {
+      const atualizado = await alternarAtivo(id);
+      setAgendamentos((prev) =>
+        prev.map((a) => (a.id === id ? atualizado : a)),
+      );
+    } catch {
+      setAgendamentos((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, ativo: !a.ativo } : a)),
+      );
+    }
+  }
+
+  useFocusEffect(useCallback(() => { carregar(); }, [carregar]));
 
   if (carregando) {
     return (
@@ -114,6 +99,14 @@ export default function TelaHome() {
   const modelo = veiculo
     ? `${veiculo.modelo}${veiculo.versao ? " " + veiculo.versao : ""}`
     : "—";
+  const proximaPartida = calcularProximaPartida(agendamentos);
+
+  const ordemTipos = ["motor", "clima", "revisao"];
+  const agendamentosOrdenados = [...agendamentos].sort((a, b) => {
+    const ia = ordemTipos.indexOf(a.tipo);
+    const ib = ordemTipos.indexOf(b.tipo);
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+  });
 
   return (
     <View style={estilos.tela}>
@@ -147,7 +140,7 @@ export default function TelaHome() {
         {/* status header */}
         <View style={estilos.statusHeader}>
           <Text style={estilos.modeloTexto}>{modelo}</Text>
-          <Text style={estilos.statusTexto}>{PLACEHOLDER.status}</Text>
+          <Text style={estilos.statusTexto}>{veiculo?.statusVeiculo ?? "—"}</Text>
         </View>
 
         {/* pill localização */}
@@ -176,8 +169,8 @@ export default function TelaHome() {
               <Text style={estilos.statLabel}>Nível de combustível</Text>
             </View>
             <View style={estilos.statValores}>
-              <Text style={estilos.statBig}>{PLACEHOLDER.combustivel}</Text>
-              <Text style={estilos.statSub}>{PLACEHOLDER.autonomia}</Text>
+              <Text style={estilos.statBig}>{veiculo ? `${veiculo.nivelCombustivel}%` : "—"}</Text>
+              <Text style={estilos.statSub}>{veiculo ? `${veiculo.autonomiaKm} km` : "—"}</Text>
             </View>
           </View>
 
@@ -187,8 +180,8 @@ export default function TelaHome() {
               <CalendarIcon size={15} color={colors.textDim} />
             </View>
             <View style={[estilos.statValores, estilos.statValoresDireita]}>
-              <Text style={estilos.statBig}>{PLACEHOLDER.proximaDia}</Text>
-              <Text style={estilos.statSub}>{PLACEHOLDER.proximaHora}</Text>
+              <Text style={estilos.statBig}>{proximaPartida?.dia ?? "—"}</Text>
+              <Text style={estilos.statSub}>{proximaPartida?.hora ?? "—"}</Text>
             </View>
           </View>
         </View>
@@ -257,12 +250,12 @@ export default function TelaHome() {
             <Text style={estilos.agendarTitulo}>Agendar</Text>
             <Text style={estilos.agendarPlus}>+</Text>
           </Pressable>
-          {agendamentos.map((item, idx) => (
+          {agendamentosOrdenados.map((item, idx) => (
             <View
               key={item.id}
               style={[
                 estilos.agendarRow,
-                idx < agendamentos.length - 1 && estilos.agendarRowBorder,
+                idx < agendamentosOrdenados.length - 1 && estilos.agendarRowBorder,
               ]}
             >
               {item.hora ? (
@@ -271,7 +264,7 @@ export default function TelaHome() {
                 <BellIcon size={16} color={colors.textDim} />
               )}
               <Text style={estilos.agendarLabel} numberOfLines={1}>
-                {item.label}
+                {item.rotulo}
               </Text>
               <Switch
                 value={item.ativo}

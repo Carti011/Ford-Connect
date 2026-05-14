@@ -1,3 +1,14 @@
+# Orquestracao do ambiente local. Sobe postgres + backend em containers.
+#
+# Os valores de banco (usuario, senha, nome do banco) sao FIXOS aqui,
+# de proposito: garantir que qualquer maquina rodando "docker-compose up -d"
+# crie um ambiente identico e previsivel, independente do que esteja em
+# .env, em variaveis de ambiente do shell, ou em qualquer outro lugar.
+#
+# Sao credenciais de banco LOCAL EFEMERO em container — sem valor de segredo.
+# Para apontar para um banco remoto (Neon, RDS, etc.), nao use docker-compose:
+# rode o backend direto via backend/dev.sh exportando PGHOST/PGUSER/etc.
+
 version: '3.8'
 
 services:
@@ -6,15 +17,15 @@ services:
     platform: linux/arm64
     container_name: ford_app_db
     environment:
-      POSTGRES_DB: ${PGDATABASE:-ford_mobile}
-      POSTGRES_USER: ${PGUSER:-ford}
-      POSTGRES_PASSWORD: ${PGPASSWORD:-ford123}
+      POSTGRES_DB: ford_mobile
+      POSTGRES_USER: ford
+      POSTGRES_PASSWORD: ford123
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-ford} -d ${PGDATABASE:-ford_mobile}"]
+      test: ["CMD-SHELL", "pg_isready -U ford -d ford_mobile"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,9 +36,9 @@ services:
     container_name: ford_app_backend
     environment:
       PGHOST: postgres
-      PGDATABASE: ${PGDATABASE:-ford_mobile}
-      PGUSER: ${PGUSER:-ford}
-      PGPASSWORD: ${PGPASSWORD:-ford123}
+      PGDATABASE: ford_mobile
+      PGUSER: ford
+      PGPASSWORD: ford123
       PGSSLMODE: disable
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}

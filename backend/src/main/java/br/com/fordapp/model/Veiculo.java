@@ -36,6 +36,27 @@ public class Veiculo {
 
     private Integer quilometragem;
 
+    @Column(name = "status_veiculo", nullable = false, length = 50)
+    private String statusVeiculo;
+
+    @Column(name = "nivel_combustivel", nullable = false)
+    private Integer nivelCombustivel;
+
+    @Column(name = "autonomia_km", nullable = false)
+    private Integer autonomiaKm;
+
+    @Column(name = "climatizacao_automatica", nullable = false)
+    private Boolean climatizacaoAutomatica;
+
+    @Column(name = "desembacar_parabrisa", nullable = false)
+    private Boolean desembacarParabrisa;
+
+    @Column(name = "banco_aquecido", nullable = false)
+    private Boolean bancoAquecido;
+
+    @Column(name = "notificar", nullable = false)
+    private Boolean notificar;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
@@ -55,6 +76,13 @@ public class Veiculo {
     public Integer getAno() { return ano; }
     public String getPlaca() { return placa; }
     public Integer getQuilometragem() { return quilometragem; }
+    public String getStatusVeiculo() { return statusVeiculo; }
+    public Integer getNivelCombustivel() { return nivelCombustivel; }
+    public Integer getAutonomiaKm() { return autonomiaKm; }
+    public Boolean getClimatizacaoAutomatica() { return climatizacaoAutomatica; }
+    public Boolean getDesembacarParabrisa() { return desembacarParabrisa; }
+    public Boolean getBancoAquecido() { return bancoAquecido; }
+    public Boolean getNotificar() { return notificar; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
 
     public void setId(UUID id) { this.id = id; }
@@ -66,5 +94,12 @@ public class Veiculo {
     public void setAno(Integer ano) { this.ano = ano; }
     public void setPlaca(String placa) { this.placa = placa; }
     public void setQuilometragem(Integer quilometragem) { this.quilometragem = quilometragem; }
+    public void setStatusVeiculo(String statusVeiculo) { this.statusVeiculo = statusVeiculo; }
+    public void setNivelCombustivel(Integer nivelCombustivel) { this.nivelCombustivel = nivelCombustivel; }
+    public void setAutonomiaKm(Integer autonomiaKm) { this.autonomiaKm = autonomiaKm; }
+    public void setClimatizacaoAutomatica(Boolean climatizacaoAutomatica) { this.climatizacaoAutomatica = climatizacaoAutomatica; }
+    public void setDesembacarParabrisa(Boolean desembacarParabrisa) { this.desembacarParabrisa = desembacarParabrisa; }
+    public void setBancoAquecido(Boolean bancoAquecido) { this.bancoAquecido = bancoAquecido; }
+    public void setNotificar(Boolean notificar) { this.notificar = notificar; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
 }

@@ -14,6 +14,31 @@ export interface Veiculo {
   ano: number;
   placa: string;
   quilometragem: number;
+  statusVeiculo: string;
+  nivelCombustivel: number;
+  autonomiaKm: number;
+  climatizacaoAutomatica: boolean;
+  desembacarParabrisa: boolean;
+  bancoAquecido: boolean;
+  notificar: boolean;
+}
+
+export interface PreferenciasVeiculo {
+  climatizacaoAutomatica?: boolean;
+  desembacarParabrisa?: boolean;
+  bancoAquecido?: boolean;
+  notificar?: boolean;
+}
+
+export interface AgendamentoVeiculo {
+  id: string;
+  tipo: string;
+  rotulo: string;
+  hora: string | null;
+  diasSemana: string | null; // dias separados por vírgula: "1,2,3,4,5" (0=Dom,...,6=Sáb)
+  ativo: boolean;
+  duracaoMinutos: number | null;
+  alvoTemperatura: number | null;
 }
 
 export interface RegistroManutencao {
@@ -24,6 +49,27 @@ export interface RegistroManutencao {
   dataServico: string;
   concessionaria: string;
   custo: number;
+}
+
+export type ModoClimatizacao = 'ac' | 'aquecedor' | 'desembacador';
+
+export interface ZonaClimatizacao {
+  id: string;
+  rotulo: string;
+  temperatura: number;
+  ativa: boolean;
+  ordem: number;
+}
+
+export interface EstadoClimatizacao {
+  id: string;
+  veiculoId: string;
+  sistemaLigado: boolean;
+  modo: ModoClimatizacao;
+  velocidadeVentilador: number;
+  temperaturaInterna: number;
+  temperaturaExterna: number;
+  zonas: ZonaClimatizacao[];
 }
 
 export type Prioridade = 'baixa' | 'media' | 'alta';

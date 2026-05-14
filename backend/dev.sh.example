@@ -1,0 +1,24 @@
+#!/bin/bash
+# Script de desenvolvimento local do backend.
+#
+# Como usar:
+#   1. cp backend/dev.sh.example backend/dev.sh
+#   2. ajuste os valores abaixo se necessario (banco, senha, segredo)
+#   3. chmod +x backend/dev.sh
+#   4. bash backend/dev.sh
+#
+# Requer um PostgreSQL acessivel. Caminho recomendado:
+#   docker-compose up -d postgres
+#
+# O dev.sh real esta no .gitignore para que cada dev tenha o seu sem
+# vazar segredos no repositorio.
+
+export PGHOST=localhost
+export PGDATABASE=ford_mobile
+export PGUSER=ford
+export PGPASSWORD=ford123
+export PGSSLMODE=disable
+export JWT_SECRET="ford-connect-local-dev-secret-com-pelo-menos-64-caracteres-para-hs256"
+export JWT_EXPIRATION_MS=86400000
+
+cd "$(dirname "$0")" && ./mvnw spring-boot:run

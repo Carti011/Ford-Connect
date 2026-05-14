@@ -16,3 +16,6 @@ Thumbs.db
 # arquivos de design
 Design System/
 Handoff/
+
+# zips do projeto (gerados manualmente para envio)
+*.zip
