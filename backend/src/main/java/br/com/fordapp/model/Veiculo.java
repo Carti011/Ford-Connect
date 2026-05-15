@@ -57,6 +57,9 @@ public class Veiculo {
     @Column(name = "notificar", nullable = false)
     private Boolean notificar;
 
+    @Column(name = "score_saude")
+    private Integer scoreSaude;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
@@ -83,6 +86,7 @@ public class Veiculo {
     public Boolean getDesembacarParabrisa() { return desembacarParabrisa; }
     public Boolean getBancoAquecido() { return bancoAquecido; }
     public Boolean getNotificar() { return notificar; }
+    public Integer getScoreSaude() { return scoreSaude; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
 
     public void setId(UUID id) { this.id = id; }
@@ -101,5 +105,6 @@ public class Veiculo {
     public void setDesembacarParabrisa(Boolean desembacarParabrisa) { this.desembacarParabrisa = desembacarParabrisa; }
     public void setBancoAquecido(Boolean bancoAquecido) { this.bancoAquecido = bancoAquecido; }
     public void setNotificar(Boolean notificar) { this.notificar = notificar; }
+    public void setScoreSaude(Integer scoreSaude) { this.scoreSaude = scoreSaude; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
 }
