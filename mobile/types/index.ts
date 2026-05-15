@@ -21,6 +21,7 @@ export interface Veiculo {
   desembacarParabrisa: boolean;
   bancoAquecido: boolean;
   notificar: boolean;
+  scoreSaude: number | null;
 }
 
 export interface PreferenciasVeiculo {
@@ -74,12 +75,63 @@ export interface EstadoClimatizacao {
 
 export type Prioridade = 'baixa' | 'media' | 'alta';
 
-export interface AlertaRevisao {
+export type TipoRecomendacao = 'revisao' | 'troca' | 'inspecao';
+
+export type StatusRecomendacao = 'atrasada' | 'proxima' | 'em_dia';
+
+export interface Recomendacao {
   id: string;
   titulo: string;
   descricao: string;
+  tipo: TipoRecomendacao | null;
+  obrigatoria: boolean;
   dataLimite: string | null;
   quilometragemLimite: number | null;
   prioridade: Prioridade;
+  custoMin: number | null;
+  custoMax: number | null;
   resolvido: boolean;
+  status: StatusRecomendacao;
+}
+
+export interface Concessionaria {
+  id: string;
+  nome: string;
+  endereco: string;
+  cidade: string;
+  estado: string;
+  telefone: string | null;
+  distanciaKm: number;
+}
+
+export interface RecomendacaoResumida {
+  id: string;
+  titulo: string;
+  tipo: TipoRecomendacao | null;
+  obrigatoria: boolean;
+  custoMin: number | null;
+  custoMax: number | null;
+}
+
+export type PeriodoAgendamento = 'manha' | 'tarde';
+
+export type StatusAgendamento = 'pendente' | 'confirmado' | 'cancelado';
+
+export interface AgendamentoServico {
+  id: string;
+  dataPreferida: string;
+  periodo: PeriodoAgendamento;
+  status: StatusAgendamento;
+  observacoes: string | null;
+  criadoEm: string;
+  concessionaria: Concessionaria;
+  recomendacoes: RecomendacaoResumida[];
+}
+
+export interface AgendamentoServicoRequest {
+  concessionariaId: string;
+  dataPreferida: string;
+  periodo: PeriodoAgendamento;
+  recomendacaoIds: string[];
+  observacoes?: string;
 }

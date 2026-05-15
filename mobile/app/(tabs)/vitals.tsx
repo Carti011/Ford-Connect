@@ -15,7 +15,7 @@ import Svg, { Line } from "react-native-svg";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../hooks/useAuth";
 import { buscarVeiculo } from "../../services/veiculo";
-import { buscarAlertas } from "../../services/alerta";
+import { buscarRecomendacoes } from "../../services/recomendacao";
 import {
   BellIcon,
   CaretIcon,
@@ -224,12 +224,12 @@ export default function TelaVitais() {
     setCarregando(true);
     setErro(null);
     try {
-      const [veiculoDados, alertasDados] = await Promise.all([
+      const [veiculoDados, recomendacoesDados] = await Promise.all([
         buscarVeiculo(idVeiculo),
-        buscarAlertas(idVeiculo),
+        buscarRecomendacoes(idVeiculo),
       ]);
       setVeiculo(veiculoDados);
-      setTotalAlertas(alertasDados.length);
+      setTotalAlertas(recomendacoesDados.length);
     } catch (e: any) {
       setErro(
         e?.response?.status === 401
