@@ -13,10 +13,12 @@ export function ItemManutencao({ manutencao }: Props) {
     year: 'numeric',
   });
 
-  const custo = manutencao.custo.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
+  const custo = manutencao.custo != null
+    ? manutencao.custo.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      })
+    : 'Cortesia';
 
   const km = manutencao.quilometragemNoServico.toLocaleString('pt-BR');
 

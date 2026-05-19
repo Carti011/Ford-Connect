@@ -51,7 +51,7 @@ export interface RegistroManutencao {
   quilometragemNoServico: number;
   dataServico: string;
   concessionaria: string;
-  custo: number;
+  custo: number | null;
 }
 
 export type ModoClimatizacao = 'ac' | 'aquecedor' | 'desembacador';
