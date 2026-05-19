@@ -21,6 +21,7 @@ import { CartaoConcessionaria } from '../../components/CartaoConcessionaria';
 import { CartaoScoreSaude } from '../../components/CartaoScoreSaude';
 import { CartaoGarantia } from '../../components/CartaoGarantia';
 import { BannerAtrasada } from '../../components/BannerAtrasada';
+import { CtaAgendarTotalizador } from '../../components/CtaAgendarTotalizador';
 import { Veiculo, Recomendacao, Concessionaria } from '../../types';
 import { colors } from '../../constants/colors';
 import { typography } from '../../constants/typography';
@@ -132,11 +133,17 @@ export default function TelaManutencao() {
               Nenhuma recomendação no momento. Seu veículo está em dia.
             </Text>
           ) : (
-            <View style={estilos.recomendacoesLista}>
-              {recomendacoes.map((rec) => (
-                <CartaoRecomendacao key={rec.id} recomendacao={rec} />
-              ))}
-            </View>
+            <>
+              <View style={estilos.recomendacoesLista}>
+                {recomendacoes.map((rec) => (
+                  <CartaoRecomendacao key={rec.id} recomendacao={rec} />
+                ))}
+              </View>
+              <CtaAgendarTotalizador
+                recomendacoes={recomendacoes}
+                onPress={() => router.push('/agendar-servico' as never)}
+              />
+            </>
           )}
         </View>
 
