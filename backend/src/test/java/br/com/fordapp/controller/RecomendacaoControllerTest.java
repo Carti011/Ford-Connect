@@ -57,6 +57,7 @@ class RecomendacaoControllerTest {
         r.setCustoMax(BigDecimal.valueOf(620));
         r.setStatus("atrasada");
         r.setResolvido(false);
+        r.setPorQueImporta("Sem essa revisão, o óleo perde viscosidade.");
 
         when(recomendacaoService.buscarPendentesPorVeiculo(veiculoId)).thenReturn(List.of(r));
 
@@ -67,7 +68,8 @@ class RecomendacaoControllerTest {
                 .andExpect(jsonPath("$[0].obrigatoria").value(true))
                 .andExpect(jsonPath("$[0].status").value("atrasada"))
                 .andExpect(jsonPath("$[0].custoMin").value(480))
-                .andExpect(jsonPath("$[0].custoMax").value(620));
+                .andExpect(jsonPath("$[0].custoMax").value(620))
+                .andExpect(jsonPath("$[0].porQueImporta").value("Sem essa revisão, o óleo perde viscosidade."));
     }
 
     @Test

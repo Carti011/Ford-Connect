@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -80,6 +81,26 @@ class VeiculoControllerTest {
                 .andExpect(jsonPath("$.statusVeiculo").value("Estacionado"))
                 .andExpect(jsonPath("$.nivelCombustivel").value(80))
                 .andExpect(jsonPath("$.autonomiaKm").value(400));
+    }
+
+    @Test
+    @WithMockUser
+    void deveSerializarScoreSaudeEGarantiaNoResponse() throws Exception {
+        UUID id = UUID.randomUUID();
+        VeiculoResponse response = new VeiculoResponse();
+        response.setId(id);
+        response.setModelo("Ranger");
+        response.setScoreSaude(78);
+        response.setGarantiaDataLimite(LocalDate.of(2026, 10, 18));
+        response.setGarantiaKmLimite(30000);
+
+        when(veiculoService.buscarPorId(id)).thenReturn(response);
+
+        mockMvc.perform(get("/api/veiculos/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.scoreSaude").value(78))
+                .andExpect(jsonPath("$.garantiaDataLimite").value("2026-10-18"))
+                .andExpect(jsonPath("$.garantiaKmLimite").value(30000));
     }
 
     @Test
