@@ -86,6 +86,7 @@ function veiculoSeed() {
     desembacarParabrisa: true,
     bancoAquecido: false,
     notificar: true,
+    scoreSaude: 78,
   };
 }
 

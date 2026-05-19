@@ -6,8 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../hooks/useAuth';
-import { buscarAlertas } from '../services/alerta';
-import { AlertaRevisao } from '../types';
+import { buscarRecomendacoes } from '../services/recomendacao';
+import { Recomendacao } from '../types';
 import { colors } from '../constants/colors';
 import { typography } from '../constants/typography';
 import { spacing } from '../constants/spacing';
@@ -89,15 +89,15 @@ function formatarTempo(dataLimite: string | null): string {
   return abs === 1 ? 'Amanhã' : `Em ${abs} dias`;
 }
 
-function alertaParaNotificacao(a: AlertaRevisao): Notificacao {
+function recomendacaoParaNotificacao(r: Recomendacao): Notificacao {
   return {
-    id: a.id,
-    titulo: a.titulo,
-    descricao: a.descricao ?? '',
-    tempo: formatarTempo(a.dataLimite),
+    id: r.id,
+    titulo: r.titulo,
+    descricao: r.descricao ?? '',
+    tempo: formatarTempo(r.dataLimite),
     categoria: 'manutencao',
     corPonto: colors.accent,
-    lida: a.resolvido,
+    lida: r.resolvido,
   };
 }
 
@@ -150,8 +150,8 @@ export default function TelaNotificacoes() {
   const carregar = useCallback(async () => {
     setCarregando(true);
     try {
-      const alertas = idVeiculo ? await buscarAlertas(idVeiculo) : [];
-      const doBackend = alertas.map(alertaParaNotificacao);
+      const recomendacoes = idVeiculo ? await buscarRecomendacoes(idVeiculo) : [];
+      const doBackend = recomendacoes.map(recomendacaoParaNotificacao);
       // mocks primeiro (mais recentes), backend depois
       setNotificacoes([...MOCKS, ...doBackend]);
     } catch {
