@@ -19,6 +19,7 @@ import { BellIcon } from '../../components/icons';
 import { CartaoRecomendacao } from '../../components/CartaoRecomendacao';
 import { CartaoConcessionaria } from '../../components/CartaoConcessionaria';
 import { CartaoScoreSaude } from '../../components/CartaoScoreSaude';
+import { CartaoGarantia } from '../../components/CartaoGarantia';
 import { Veiculo, Recomendacao, Concessionaria } from '../../types';
 import { colors } from '../../constants/colors';
 import { typography } from '../../constants/typography';
@@ -101,6 +102,12 @@ export default function TelaManutencao() {
         <View style={estilos.scoreSecao}>
           <CartaoScoreSaude score={score} modelo={modeloTexto} />
         </View>
+
+        {veiculo ? (
+          <View style={estilos.garantiaSecao}>
+            <CartaoGarantia veiculo={veiculo} recomendacoes={recomendacoes} />
+          </View>
+        ) : null}
 
         {erro && (
           <Pressable onPress={carregar} style={estilos.erroContainer}>
@@ -185,7 +192,11 @@ const estilos = StyleSheet.create({
   scoreSecao: {
     paddingHorizontal: spacing[6],
     paddingTop: spacing[5],
-    paddingBottom: spacing[5],
+    paddingBottom: spacing[4],
+  },
+  garantiaSecao: {
+    paddingHorizontal: spacing[6],
+    marginBottom: spacing[5],
   },
   recomendacoesSecao: {
     marginHorizontal: spacing[6],
