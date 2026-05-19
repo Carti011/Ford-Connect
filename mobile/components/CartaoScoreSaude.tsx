@@ -4,7 +4,6 @@ import Svg, { Circle } from 'react-native-svg';
 import { colors } from '../constants/colors';
 import { typography } from '../constants/typography';
 import { spacing } from '../constants/spacing';
-import { radius } from '../constants/radius';
 
 interface Props {
   score: number | null;
@@ -18,7 +17,7 @@ function rotuloDoScore(score: number | null): { texto: string; cor: string } {
   return { texto: 'Bom', cor: colors.ok };
 }
 
-const TAMANHO = 168;
+const TAMANHO = 184;
 const TRAÇO = 14;
 const RAIO = (TAMANHO - TRAÇO) / 2;
 const CIRCUMFERENCIA = 2 * Math.PI * RAIO;
@@ -29,11 +28,9 @@ export function CartaoScoreSaude({ score, modelo }: Props) {
   const offset = CIRCUMFERENCIA * (1 - valor / 100);
 
   return (
-    <View style={estilos.cartao}>
-      <View style={estilos.cabecalho}>
-        <Text style={estilos.modelo}>{modelo}</Text>
-        <Text style={estilos.subRotulo}>Saúde do veículo</Text>
-      </View>
+    <View style={estilos.hero}>
+      <Text style={estilos.eyebrow}>Saúde do veículo</Text>
+      <Text style={estilos.modelo}>{modelo}</Text>
 
       <View style={estilos.gaugeWrap}>
         <Svg width={TAMANHO} height={TAMANHO}>
@@ -60,7 +57,7 @@ export function CartaoScoreSaude({ score, modelo }: Props) {
         </Svg>
         <View style={estilos.centro} pointerEvents="none">
           <Text style={estilos.numero}>{score ?? '—'}</Text>
-          <Text style={estilos.escala}>/100</Text>
+          <Text style={estilos.escala}>de 100</Text>
         </View>
       </View>
 
@@ -72,32 +69,24 @@ export function CartaoScoreSaude({ score, modelo }: Props) {
 }
 
 const estilos = StyleSheet.create({
-  cartao: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: spacing[5],
-    paddingHorizontal: spacing[5],
+  hero: {
     alignItems: 'center',
-    gap: spacing[4],
+    gap: spacing[3],
+    paddingVertical: spacing[2],
   },
-  cabecalho: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  modelo: {
-    fontSize: typography.size.base,
-    fontWeight: typography.weight.semibold,
-    fontFamily: 'Inter_600SemiBold',
-    color: colors.text,
-  },
-  subRotulo: {
+  eyebrow: {
     fontSize: typography.size.xs,
     fontFamily: 'Inter_500Medium',
     color: colors.textDim,
     letterSpacing: typography.letterSpacing.loose,
     textTransform: 'uppercase',
+  },
+  modelo: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.semibold,
+    fontFamily: 'Inter_600SemiBold',
+    color: colors.text,
+    marginBottom: spacing[2],
   },
   gaugeWrap: {
     width: TAMANHO,
@@ -110,23 +99,23 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
   },
   numero: {
-    fontSize: 56,
+    fontSize: 64,
     fontWeight: typography.weight.bold,
     fontFamily: 'Inter_700Bold',
     color: colors.text,
     letterSpacing: typography.letterSpacing.tight,
-    lineHeight: 60,
+    lineHeight: 68,
   },
   escala: {
-    fontSize: typography.size.md,
-    fontFamily: 'Inter_500Medium',
+    fontSize: typography.size.sm,
+    fontFamily: 'Inter_400Regular',
     color: colors.textDim,
     marginTop: -spacing[1],
   },
   badge: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
-    borderRadius: radius.pill,
+    borderRadius: 999,
     borderWidth: 1,
   },
   badgeTexto: {

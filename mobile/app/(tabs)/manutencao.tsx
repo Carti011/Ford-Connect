@@ -22,7 +22,6 @@ import { CartaoConcessionaria } from '../../components/CartaoConcessionaria';
 import { CartaoScoreSaude } from '../../components/CartaoScoreSaude';
 import { CartaoGarantia } from '../../components/CartaoGarantia';
 import { BannerAtrasada } from '../../components/BannerAtrasada';
-import { CtaAgendarTotalizador } from '../../components/CtaAgendarTotalizador';
 import { CartaoFidelidade } from '../../components/CartaoFidelidade';
 import { Veiculo, Recomendacao, Concessionaria, RegistroManutencao } from '../../types';
 import { colors } from '../../constants/colors';
@@ -117,6 +116,18 @@ export default function TelaManutencao() {
           </View>
         ) : null}
 
+        {concessionariaProxima ? (
+          <View style={estilos.concessionariaSecao}>
+            <Text style={estilos.concessionariaTitulo}>
+              Concessionária mais próxima
+            </Text>
+            <CartaoConcessionaria
+              concessionaria={concessionariaProxima}
+              onAgendar={() => router.push('/agendar-servico')}
+            />
+          </View>
+        ) : null}
+
         {erro && (
           <Pressable onPress={carregar} style={estilos.erroContainer}>
             <Text style={estilos.erroTexto}>{erro}</Text>
@@ -129,11 +140,6 @@ export default function TelaManutencao() {
             O que precisa fazer agora
           </Text>
 
-          <BannerAtrasada
-            recomendacoes={recomendacoes}
-            onPress={() => router.push('/agendar-servico')}
-          />
-
           {recomendacoes.length === 0 ? (
             <Text style={estilos.recomendacoesVazio}>
               Nenhuma recomendação no momento. Seu veículo está em dia.
@@ -145,25 +151,13 @@ export default function TelaManutencao() {
                   <CartaoRecomendacao key={rec.id} recomendacao={rec} />
                 ))}
               </View>
-              <CtaAgendarTotalizador
+              <BannerAtrasada
                 recomendacoes={recomendacoes}
                 onPress={() => router.push('/agendar-servico')}
               />
             </>
           )}
         </View>
-
-        {concessionariaProxima ? (
-          <View style={estilos.concessionariaSecao}>
-            <Text style={estilos.concessionariaTitulo}>
-              Concessionária mais próxima
-            </Text>
-            <CartaoConcessionaria
-              concessionaria={concessionariaProxima}
-              onAgendar={() => router.push('/agendar-servico')}
-            />
-          </View>
-        ) : null}
 
         {veiculo && manutencoes.length > 0 ? (
           <View style={estilos.fidelidadeSecao}>
@@ -217,8 +211,8 @@ const estilos = StyleSheet.create({
   },
   scoreSecao: {
     paddingHorizontal: spacing[6],
-    paddingTop: spacing[5],
-    paddingBottom: spacing[4],
+    paddingTop: spacing[4],
+    paddingBottom: spacing[6],
   },
   garantiaSecao: {
     paddingHorizontal: spacing[6],
