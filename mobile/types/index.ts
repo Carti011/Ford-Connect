@@ -22,6 +22,8 @@ export interface Veiculo {
   bancoAquecido: boolean;
   notificar: boolean;
   scoreSaude: number | null;
+  garantiaDataLimite: string | null;
+  garantiaKmLimite: number | null;
 }
 
 export interface PreferenciasVeiculo {
