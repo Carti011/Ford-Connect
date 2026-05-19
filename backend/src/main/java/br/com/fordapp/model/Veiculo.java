@@ -1,6 +1,7 @@
 package br.com.fordapp.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -60,6 +61,12 @@ public class Veiculo {
     @Column(name = "score_saude")
     private Integer scoreSaude;
 
+    @Column(name = "garantia_data_limite")
+    private LocalDate garantiaDataLimite;
+
+    @Column(name = "garantia_km_limite")
+    private Integer garantiaKmLimite;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
@@ -87,6 +94,8 @@ public class Veiculo {
     public Boolean getBancoAquecido() { return bancoAquecido; }
     public Boolean getNotificar() { return notificar; }
     public Integer getScoreSaude() { return scoreSaude; }
+    public LocalDate getGarantiaDataLimite() { return garantiaDataLimite; }
+    public Integer getGarantiaKmLimite() { return garantiaKmLimite; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
 
     public void setId(UUID id) { this.id = id; }
@@ -106,5 +115,7 @@ public class Veiculo {
     public void setBancoAquecido(Boolean bancoAquecido) { this.bancoAquecido = bancoAquecido; }
     public void setNotificar(Boolean notificar) { this.notificar = notificar; }
     public void setScoreSaude(Integer scoreSaude) { this.scoreSaude = scoreSaude; }
+    public void setGarantiaDataLimite(LocalDate garantiaDataLimite) { this.garantiaDataLimite = garantiaDataLimite; }
+    public void setGarantiaKmLimite(Integer garantiaKmLimite) { this.garantiaKmLimite = garantiaKmLimite; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
 }
