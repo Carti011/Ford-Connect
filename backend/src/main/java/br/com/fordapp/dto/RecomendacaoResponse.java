@@ -18,6 +18,7 @@ public class RecomendacaoResponse {
     private String prioridade;
     private BigDecimal custoMin;
     private BigDecimal custoMax;
+    private String porQueImporta;
     private Boolean resolvido;
     private String status;
 
@@ -35,6 +36,7 @@ public class RecomendacaoResponse {
         dto.prioridade = recomendacao.getPrioridade();
         dto.custoMin = recomendacao.getCustoMin();
         dto.custoMax = recomendacao.getCustoMax();
+        dto.porQueImporta = recomendacao.getPorQueImporta();
         dto.resolvido = recomendacao.getResolvido();
         dto.status = calcularStatus(recomendacao, kmAtual, hoje);
         return dto;
@@ -76,6 +78,7 @@ public class RecomendacaoResponse {
     public String getPrioridade() { return prioridade; }
     public BigDecimal getCustoMin() { return custoMin; }
     public BigDecimal getCustoMax() { return custoMax; }
+    public String getPorQueImporta() { return porQueImporta; }
     public Boolean getResolvido() { return resolvido; }
     public String getStatus() { return status; }
 
@@ -89,6 +92,7 @@ public class RecomendacaoResponse {
     public void setPrioridade(String prioridade) { this.prioridade = prioridade; }
     public void setCustoMin(BigDecimal custoMin) { this.custoMin = custoMin; }
     public void setCustoMax(BigDecimal custoMax) { this.custoMax = custoMax; }
+    public void setPorQueImporta(String porQueImporta) { this.porQueImporta = porQueImporta; }
     public void setResolvido(Boolean resolvido) { this.resolvido = resolvido; }
     public void setStatus(String status) { this.status = status; }
 }

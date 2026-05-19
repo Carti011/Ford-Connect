@@ -47,6 +47,9 @@ public class Recomendacao {
     @Column(name = "custo_max")
     private BigDecimal custoMax;
 
+    @Column(name = "por_que_importa", columnDefinition = "TEXT")
+    private String porQueImporta;
+
     public Recomendacao() {}
 
     public UUID getId() { return id; }
@@ -61,6 +64,7 @@ public class Recomendacao {
     public Boolean getObrigatoria() { return obrigatoria; }
     public BigDecimal getCustoMin() { return custoMin; }
     public BigDecimal getCustoMax() { return custoMax; }
+    public String getPorQueImporta() { return porQueImporta; }
 
     public void setId(UUID id) { this.id = id; }
     public void setVeiculo(Veiculo veiculo) { this.veiculo = veiculo; }
@@ -74,4 +78,5 @@ public class Recomendacao {
     public void setObrigatoria(Boolean obrigatoria) { this.obrigatoria = obrigatoria; }
     public void setCustoMin(BigDecimal custoMin) { this.custoMin = custoMin; }
     public void setCustoMax(BigDecimal custoMax) { this.custoMax = custoMax; }
+    public void setPorQueImporta(String porQueImporta) { this.porQueImporta = porQueImporta; }
 }
