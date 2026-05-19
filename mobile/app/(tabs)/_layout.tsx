@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { VehicleIcon, GaugeIcon, ClockIcon } from '../../components/icons';
+import { VehicleIcon, GaugeIcon, WrenchIcon, ClockIcon } from '../../components/icons';
 import { TabBarPersonalizada } from '../../components/TabBarPersonalizada';
 
 export default function TabLayout() {
@@ -20,6 +20,12 @@ export default function TabLayout() {
         name="vitals"
         options={{
           tabBarIcon: ({ color }) => <GaugeIcon size={22} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="manutencao"
+        options={{
+          tabBarIcon: ({ color }) => <WrenchIcon size={22} color={color} />,
         }}
       />
       <Tabs.Screen
