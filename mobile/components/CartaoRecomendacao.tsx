@@ -1,11 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Recomendacao, StatusRecomendacao } from '../types';
 import { colors } from '../constants/colors';
 import { typography } from '../constants/typography';
 import { spacing } from '../constants/spacing';
 import { radius } from '../constants/radius';
-import { WrenchIcon } from './icons';
+import { WrenchIcon, CaretIcon } from './icons';
 
 interface Props {
   recomendacao: Recomendacao;
@@ -44,9 +44,11 @@ function formatarCusto(min: number | null, max: number | null): string | null {
 }
 
 export function CartaoRecomendacao({ recomendacao }: Props) {
+  const [expandido, setExpandido] = useState(false);
   const cor = corStatus[recomendacao.status];
   const prazo = formatarPrazo(recomendacao);
   const custo = formatarCusto(recomendacao.custoMin, recomendacao.custoMax);
+  const temPorQue = !!recomendacao.porQueImporta;
 
   return (
     <View style={[estilos.cartao, { borderLeftColor: cor }]}>
@@ -75,6 +77,25 @@ export function CartaoRecomendacao({ recomendacao }: Props) {
 
       {prazo ? <Text style={estilos.prazo}>Prazo: {prazo}</Text> : null}
       {custo ? <Text style={estilos.custo}>{custo}</Text> : null}
+
+      {temPorQue ? (
+        <View style={estilos.expansor}>
+          <Pressable
+            onPress={() => setExpandido((v) => !v)}
+            style={({ pressed }) => [estilos.expansorBotao, pressed && estilos.expansorPressed]}
+          >
+            <Text style={estilos.expansorTexto}>
+              {expandido ? 'Ocultar explicação' : 'Por que isso é importante?'}
+            </Text>
+            <View style={[estilos.caret, expandido && estilos.caretAberto]}>
+              <CaretIcon size={12} color={colors.textDim} />
+            </View>
+          </Pressable>
+          {expandido ? (
+            <Text style={estilos.porQueTexto}>{recomendacao.porQueImporta}</Text>
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -144,5 +165,38 @@ const estilos = StyleSheet.create({
     color: colors.text,
     fontWeight: typography.weight.semibold,
     fontFamily: 'Inter_600SemiBold',
+  },
+  expansor: {
+    marginTop: spacing[2],
+    paddingTop: spacing[3],
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    gap: spacing[2],
+  },
+  expansorBotao: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  expansorPressed: {
+    opacity: 0.7,
+  },
+  expansorTexto: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    fontFamily: 'Inter_600SemiBold',
+    color: colors.textDim,
+  },
+  caret: {
+    transform: [{ rotate: '90deg' }],
+  },
+  caretAberto: {
+    transform: [{ rotate: '270deg' }],
+  },
+  porQueTexto: {
+    fontSize: typography.size.sm,
+    color: colors.textDim,
+    fontFamily: 'Inter_400Regular',
+    lineHeight: 19,
   },
 });

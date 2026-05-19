@@ -20,6 +20,7 @@ import { CartaoRecomendacao } from '../../components/CartaoRecomendacao';
 import { CartaoConcessionaria } from '../../components/CartaoConcessionaria';
 import { CartaoScoreSaude } from '../../components/CartaoScoreSaude';
 import { CartaoGarantia } from '../../components/CartaoGarantia';
+import { BannerAtrasada } from '../../components/BannerAtrasada';
 import { Veiculo, Recomendacao, Concessionaria } from '../../types';
 import { colors } from '../../constants/colors';
 import { typography } from '../../constants/typography';
@@ -120,6 +121,12 @@ export default function TelaManutencao() {
           <Text style={estilos.recomendacoesTitulo}>
             O que precisa fazer agora
           </Text>
+
+          <BannerAtrasada
+            recomendacoes={recomendacoes}
+            onPress={() => router.push('/agendar-servico' as never)}
+          />
+
           {recomendacoes.length === 0 ? (
             <Text style={estilos.recomendacoesVazio}>
               Nenhuma recomendação no momento. Seu veículo está em dia.
@@ -201,13 +208,13 @@ const estilos = StyleSheet.create({
   recomendacoesSecao: {
     marginHorizontal: spacing[6],
     marginBottom: spacing[5],
+    gap: spacing[3],
   },
   recomendacoesTitulo: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     fontFamily: 'Inter_600SemiBold',
     color: colors.text,
-    marginBottom: spacing[3],
   },
   recomendacoesLista: {
     gap: spacing[3],
