@@ -16,13 +16,15 @@ import { useRouter } from "expo-router";
 import { useAuth } from "../../hooks/useAuth";
 import { buscarVeiculo } from "../../services/veiculo";
 import { buscarRecomendacoes } from "../../services/recomendacao";
+import { listarConcessionarias } from "../../services/concessionaria";
 import {
   BellIcon,
-  CaretIcon,
   OilIcon,
   WiperIcon,
 } from "../../components/icons";
-import { Veiculo } from "../../types";
+import { CartaoRecomendacao } from "../../components/CartaoRecomendacao";
+import { CartaoConcessionaria } from "../../components/CartaoConcessionaria";
+import { Veiculo, Recomendacao, Concessionaria } from "../../types";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import { spacing } from "../../constants/spacing";
@@ -208,11 +210,20 @@ function CardVital({
   );
 }
 
+function rotuloDoScore(score: number | null | undefined): { texto: string; cor: string } {
+  if (score == null) return { texto: "Indisponível", cor: colors.textDim };
+  if (score <= 50) return { texto: "Crítico", cor: colors.danger };
+  if (score <= 79) return { texto: "Atenção", cor: colors.warn };
+  return { texto: "Bom", cor: colors.ok };
+}
+
 export default function TelaVitais() {
   const router = useRouter();
   const { idVeiculo } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
-  const [totalAlertas, setTotalAlertas] = useState(0);
+  const [recomendacoes, setRecomendacoes] = useState<Recomendacao[]>([]);
+  const [concessionariaProxima, setConcessionariaProxima] =
+    useState<Concessionaria | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -224,12 +235,14 @@ export default function TelaVitais() {
     setCarregando(true);
     setErro(null);
     try {
-      const [veiculoDados, recomendacoesDados] = await Promise.all([
+      const [veiculoDados, recomendacoesDados, concessionarias] = await Promise.all([
         buscarVeiculo(idVeiculo),
         buscarRecomendacoes(idVeiculo),
+        listarConcessionarias(),
       ]);
       setVeiculo(veiculoDados);
-      setTotalAlertas(recomendacoesDados.length);
+      setRecomendacoes(recomendacoesDados);
+      setConcessionariaProxima(concessionarias[0] ?? null);
     } catch (e: any) {
       setErro(
         e?.response?.status === 401
@@ -258,12 +271,8 @@ export default function TelaVitais() {
     ? veiculo.quilometragem.toLocaleString("pt-BR")
     : "—";
 
-  const tituloAlerta =
-    totalAlertas === 0
-      ? "Nenhum alerta\nativo"
-      : totalAlertas === 1
-        ? "1 alerta\nativo"
-        : `${totalAlertas} alertas\nativos`;
+  const score = veiculo?.scoreSaude ?? null;
+  const rotuloScore = rotuloDoScore(score);
 
   return (
     <View style={estilos.tela}>
@@ -285,10 +294,16 @@ export default function TelaVitais() {
           </Pressable>
         </SafeAreaView>
 
-        {/* header */}
+        {/* header com score de saude */}
         <View style={estilos.header}>
           <Text style={estilos.subtitulo}>{modeloTexto}</Text>
-          <Text style={estilos.titulo}>{tituloAlerta}</Text>
+          <View style={estilos.scoreLinha}>
+            <Text style={estilos.scoreNumero}>{score ?? "—"}</Text>
+            <Text style={estilos.scoreEscala}>/100</Text>
+          </View>
+          <Text style={[estilos.scoreRotulo, { color: rotuloScore.cor }]}>
+            Saúde do veículo · {rotuloScore.texto}
+          </Text>
         </View>
 
         {/* odômetro */}
@@ -336,21 +351,36 @@ export default function TelaVitais() {
           />
         </View>
 
-        {/* programação da manutenção */}
-        <View style={estilos.manutencaoSecao}>
-          <Text style={estilos.manutencaoTitulo}>
-            Programação da manutenção
+        {/* recomendações */}
+        <View style={estilos.recomendacoesSecao}>
+          <Text style={estilos.recomendacoesTitulo}>
+            O que precisa fazer agora
           </Text>
-          <Pressable
-            style={({ pressed }) => [
-              estilos.manutencaoRow,
-              pressed && estilos.manutencaoRowPressed,
-            ]}
-          >
-            <Text style={estilos.manutencaoLabel}>Plano de manutenção</Text>
-            <CaretIcon size={14} color={colors.textDim} />
-          </Pressable>
+          {recomendacoes.length === 0 ? (
+            <Text style={estilos.recomendacoesVazio}>
+              Nenhuma recomendação no momento. Seu veículo está em dia.
+            </Text>
+          ) : (
+            <View style={estilos.recomendacoesLista}>
+              {recomendacoes.map((rec) => (
+                <CartaoRecomendacao key={rec.id} recomendacao={rec} />
+              ))}
+            </View>
+          )}
         </View>
+
+        {/* concessionária mais próxima */}
+        {concessionariaProxima ? (
+          <View style={estilos.concessionariaSecao}>
+            <Text style={estilos.concessionariaTitulo}>
+              Concessionária mais próxima
+            </Text>
+            <CartaoConcessionaria
+              concessionaria={concessionariaProxima}
+              onAgendar={() => router.push("/agendar-servico" as never)}
+            />
+          </View>
+        ) : null}
 
         <View style={{ height: layout.tabbarHeight }} />
       </ScrollView>
@@ -412,15 +442,35 @@ const estilos = StyleSheet.create({
     marginBottom: spacing[2],
     letterSpacing: 0.2,
   },
-  titulo: {
-    fontSize: typography.size["3xl"],
+  scoreLinha: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: spacing[1],
+  },
+  scoreNumero: {
+    fontSize: typography.size["4xl"],
     fontWeight: typography.weight.bold,
     fontFamily: "Inter_700Bold",
     color: colors.text,
     letterSpacing: typography.letterSpacing.tight,
     lineHeight: Math.round(
-      typography.size["3xl"] * typography.lineHeight.tight,
+      typography.size["4xl"] * typography.lineHeight.tight,
     ),
+  },
+  scoreEscala: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.medium,
+    fontFamily: "Inter_500Medium",
+    color: colors.textDim,
+    marginBottom: spacing[2],
+  },
+  scoreRotulo: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    fontFamily: "Inter_600SemiBold",
+    marginTop: spacing[1],
+    letterSpacing: typography.letterSpacing.loose,
+    textTransform: "uppercase",
   },
 
   // odômetro
@@ -520,36 +570,39 @@ const estilos = StyleSheet.create({
     fontFamily: "Inter_400Regular",
   },
 
-  // manutenção
-  manutencaoSecao: {
+  // recomendações
+  recomendacoesSecao: {
     marginHorizontal: spacing[6],
-    marginBottom: spacing[4],
+    marginBottom: spacing[5],
   },
-  manutencaoTitulo: {
+  recomendacoesTitulo: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     fontFamily: "Inter_600SemiBold",
     color: colors.text,
     marginBottom: spacing[3],
   },
-  manutencaoRow: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
-    borderWidth: 1,
-    borderColor: colors.border,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  recomendacoesLista: {
+    gap: spacing[3],
   },
-  manutencaoRowPressed: {
-    backgroundColor: colors.surfaceHi,
-  },
-  manutencaoLabel: {
-    fontSize: typography.size.base,
+  recomendacoesVazio: {
+    fontSize: typography.size.sm,
+    color: colors.textDim,
     fontFamily: "Inter_400Regular",
+    fontStyle: "italic",
+  },
+
+  // concessionária
+  concessionariaSecao: {
+    marginHorizontal: spacing[6],
+    marginBottom: spacing[5],
+  },
+  concessionariaTitulo: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
+    fontFamily: "Inter_600SemiBold",
     color: colors.text,
+    marginBottom: spacing[3],
   },
 
   // erro
