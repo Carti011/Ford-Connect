@@ -1,12 +1,13 @@
 package br.com.fordapp.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "alertas_revisao")
-public class AlertaRevisao {
+@Table(name = "recomendacoes")
+public class Recomendacao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -34,7 +35,19 @@ public class AlertaRevisao {
     @Column(nullable = false)
     private Boolean resolvido;
 
-    public AlertaRevisao() {}
+    @Column(length = 30)
+    private String tipo;
+
+    @Column(nullable = false)
+    private Boolean obrigatoria;
+
+    @Column(name = "custo_min")
+    private BigDecimal custoMin;
+
+    @Column(name = "custo_max")
+    private BigDecimal custoMax;
+
+    public Recomendacao() {}
 
     public UUID getId() { return id; }
     public Veiculo getVeiculo() { return veiculo; }
@@ -44,6 +57,10 @@ public class AlertaRevisao {
     public Integer getQuilometragemLimite() { return quilometragemLimite; }
     public String getPrioridade() { return prioridade; }
     public Boolean getResolvido() { return resolvido; }
+    public String getTipo() { return tipo; }
+    public Boolean getObrigatoria() { return obrigatoria; }
+    public BigDecimal getCustoMin() { return custoMin; }
+    public BigDecimal getCustoMax() { return custoMax; }
 
     public void setId(UUID id) { this.id = id; }
     public void setVeiculo(Veiculo veiculo) { this.veiculo = veiculo; }
@@ -53,4 +70,8 @@ public class AlertaRevisao {
     public void setQuilometragemLimite(Integer quilometragemLimite) { this.quilometragemLimite = quilometragemLimite; }
     public void setPrioridade(String prioridade) { this.prioridade = prioridade; }
     public void setResolvido(Boolean resolvido) { this.resolvido = resolvido; }
+    public void setTipo(String tipo) { this.tipo = tipo; }
+    public void setObrigatoria(Boolean obrigatoria) { this.obrigatoria = obrigatoria; }
+    public void setCustoMin(BigDecimal custoMin) { this.custoMin = custoMin; }
+    public void setCustoMax(BigDecimal custoMax) { this.custoMax = custoMax; }
 }
