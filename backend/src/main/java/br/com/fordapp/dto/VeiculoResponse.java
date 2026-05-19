@@ -20,6 +20,7 @@ public class VeiculoResponse {
     private Boolean desembacarParabrisa;
     private Boolean bancoAquecido;
     private Boolean notificar;
+    private Integer scoreSaude;
 
     public VeiculoResponse() {}
 
@@ -40,6 +41,7 @@ public class VeiculoResponse {
         dto.desembacarParabrisa = veiculo.getDesembacarParabrisa();
         dto.bancoAquecido = veiculo.getBancoAquecido();
         dto.notificar = veiculo.getNotificar();
+        dto.scoreSaude = veiculo.getScoreSaude();
         return dto;
     }
 
@@ -58,6 +60,7 @@ public class VeiculoResponse {
     public Boolean getDesembacarParabrisa() { return desembacarParabrisa; }
     public Boolean getBancoAquecido() { return bancoAquecido; }
     public Boolean getNotificar() { return notificar; }
+    public Integer getScoreSaude() { return scoreSaude; }
 
     public void setId(UUID id) { this.id = id; }
     public void setNomeProprietario(String nomeProprietario) { this.nomeProprietario = nomeProprietario; }
@@ -74,4 +77,5 @@ public class VeiculoResponse {
     public void setDesembacarParabrisa(Boolean desembacarParabrisa) { this.desembacarParabrisa = desembacarParabrisa; }
     public void setBancoAquecido(Boolean bancoAquecido) { this.bancoAquecido = bancoAquecido; }
     public void setNotificar(Boolean notificar) { this.notificar = notificar; }
+    public void setScoreSaude(Integer scoreSaude) { this.scoreSaude = scoreSaude; }
 }
