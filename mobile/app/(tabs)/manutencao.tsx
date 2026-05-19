@@ -1,17 +1,89 @@
-import React from 'react';
-import { View, Text, ScrollView, Pressable, Image, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../../hooks/useAuth';
+import { buscarVeiculo } from '../../services/veiculo';
+import { buscarRecomendacoes } from '../../services/recomendacao';
+import { listarConcessionarias } from '../../services/concessionaria';
 import { BellIcon } from '../../components/icons';
+import { CartaoRecomendacao } from '../../components/CartaoRecomendacao';
+import { CartaoConcessionaria } from '../../components/CartaoConcessionaria';
+import { Veiculo, Recomendacao, Concessionaria } from '../../types';
 import { colors } from '../../constants/colors';
 import { typography } from '../../constants/typography';
 import { spacing } from '../../constants/spacing';
 import { radius } from '../../constants/radius';
 import { layout } from '../../constants/layout';
 
+function rotuloDoScore(score: number | null | undefined): { texto: string; cor: string } {
+  if (score == null) return { texto: 'Indisponível', cor: colors.textDim };
+  if (score <= 50) return { texto: 'Crítico', cor: colors.danger };
+  if (score <= 79) return { texto: 'Atenção', cor: colors.warn };
+  return { texto: 'Bom', cor: colors.ok };
+}
+
 export default function TelaManutencao() {
   const router = useRouter();
+  const { idVeiculo } = useAuth();
+  const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
+  const [recomendacoes, setRecomendacoes] = useState<Recomendacao[]>([]);
+  const [concessionariaProxima, setConcessionariaProxima] =
+    useState<Concessionaria | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+
+  const carregar = useCallback(async () => {
+    if (!idVeiculo) {
+      setCarregando(false);
+      return;
+    }
+    setCarregando(true);
+    setErro(null);
+    try {
+      const [veiculoDados, recomendacoesDados, concessionarias] = await Promise.all([
+        buscarVeiculo(idVeiculo),
+        buscarRecomendacoes(idVeiculo),
+        listarConcessionarias(),
+      ]);
+      setVeiculo(veiculoDados);
+      setRecomendacoes(recomendacoesDados);
+      setConcessionariaProxima(concessionarias[0] ?? null);
+    } catch (e: any) {
+      setErro(
+        e?.response?.status === 401
+          ? 'Sessão expirada. Faça login novamente.'
+          : 'Não foi possível carregar os dados.',
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }, [idVeiculo]);
+
+  useEffect(() => {
+    carregar();
+  }, [carregar]);
+
+  if (carregando) {
+    return (
+      <View style={estilos.centrado}>
+        <ActivityIndicator size="large" color={colors.accent} />
+      </View>
+    );
+  }
+
+  const modeloTexto = veiculo ? `${veiculo.marca} ${veiculo.modelo}` : '—';
+  const score = veiculo?.scoreSaude ?? null;
+  const rotuloScore = rotuloDoScore(score);
 
   return (
     <View style={estilos.tela}>
@@ -34,16 +106,51 @@ export default function TelaManutencao() {
         </SafeAreaView>
 
         <View style={estilos.header}>
-          <Text style={estilos.subtitulo}>Plano de cuidados</Text>
-          <Text style={estilos.titulo}>Manutenção</Text>
-        </View>
-
-        <View style={estilos.placeholderBox}>
-          <Text style={estilos.placeholderTitulo}>Em construção</Text>
-          <Text style={estilos.placeholderSub}>
-            Aqui vão chegar o score de saúde do veículo, o cartão de garantia, suas recomendações com prazo e custo, e o caminho até a concessionária mais próxima.
+          <Text style={estilos.subtitulo}>{modeloTexto}</Text>
+          <View style={estilos.scoreLinha}>
+            <Text style={estilos.scoreNumero}>{score ?? '—'}</Text>
+            <Text style={estilos.scoreEscala}>/100</Text>
+          </View>
+          <Text style={[estilos.scoreRotulo, { color: rotuloScore.cor }]}>
+            Saúde do veículo · {rotuloScore.texto}
           </Text>
         </View>
+
+        {erro && (
+          <Pressable onPress={carregar} style={estilos.erroContainer}>
+            <Text style={estilos.erroTexto}>{erro}</Text>
+            <Text style={estilos.erroLink}>Tentar novamente</Text>
+          </Pressable>
+        )}
+
+        <View style={estilos.recomendacoesSecao}>
+          <Text style={estilos.recomendacoesTitulo}>
+            O que precisa fazer agora
+          </Text>
+          {recomendacoes.length === 0 ? (
+            <Text style={estilos.recomendacoesVazio}>
+              Nenhuma recomendação no momento. Seu veículo está em dia.
+            </Text>
+          ) : (
+            <View style={estilos.recomendacoesLista}>
+              {recomendacoes.map((rec) => (
+                <CartaoRecomendacao key={rec.id} recomendacao={rec} />
+              ))}
+            </View>
+          )}
+        </View>
+
+        {concessionariaProxima ? (
+          <View style={estilos.concessionariaSecao}>
+            <Text style={estilos.concessionariaTitulo}>
+              Concessionária mais próxima
+            </Text>
+            <CartaoConcessionaria
+              concessionaria={concessionariaProxima}
+              onAgendar={() => router.push('/agendar-servico' as never)}
+            />
+          </View>
+        ) : null}
 
         <View style={{ height: layout.tabbarHeight }} />
       </ScrollView>
@@ -54,6 +161,12 @@ export default function TelaManutencao() {
 const estilos = StyleSheet.create({
   tela: {
     flex: 1,
+    backgroundColor: colors.bg,
+  },
+  centrado: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: colors.bg,
   },
   scroll: {
@@ -86,7 +199,7 @@ const estilos = StyleSheet.create({
   header: {
     paddingHorizontal: spacing[6],
     paddingTop: spacing[5],
-    paddingBottom: spacing[4],
+    paddingBottom: spacing[5],
   },
   subtitulo: {
     fontSize: typography.size.sm,
@@ -95,33 +208,80 @@ const estilos = StyleSheet.create({
     marginBottom: spacing[2],
     letterSpacing: 0.2,
   },
-  titulo: {
-    fontSize: typography.size['3xl'],
+  scoreLinha: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: spacing[1],
+  },
+  scoreNumero: {
+    fontSize: typography.size['4xl'],
     fontWeight: typography.weight.bold,
     fontFamily: 'Inter_700Bold',
     color: colors.text,
     letterSpacing: typography.letterSpacing.tight,
-    lineHeight: Math.round(typography.size['3xl'] * typography.lineHeight.snug),
+    lineHeight: Math.round(typography.size['4xl'] * typography.lineHeight.tight),
   },
-  placeholderBox: {
+  scoreEscala: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.medium,
+    fontFamily: 'Inter_500Medium',
+    color: colors.textDim,
+    marginBottom: spacing[2],
+  },
+  scoreRotulo: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.semibold,
+    fontFamily: 'Inter_600SemiBold',
+    marginTop: spacing[1],
+    letterSpacing: typography.letterSpacing.loose,
+    textTransform: 'uppercase',
+  },
+  recomendacoesSecao: {
     marginHorizontal: spacing[6],
-    padding: spacing[5],
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing[2],
+    marginBottom: spacing[5],
   },
-  placeholderTitulo: {
+  recomendacoesTitulo: {
     fontSize: typography.size.lg,
     fontWeight: typography.weight.semibold,
     fontFamily: 'Inter_600SemiBold',
     color: colors.text,
+    marginBottom: spacing[3],
   },
-  placeholderSub: {
+  recomendacoesLista: {
+    gap: spacing[3],
+  },
+  recomendacoesVazio: {
     fontSize: typography.size.sm,
     color: colors.textDim,
     fontFamily: 'Inter_400Regular',
-    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  concessionariaSecao: {
+    marginHorizontal: spacing[6],
+    marginBottom: spacing[5],
+  },
+  concessionariaTitulo: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
+    fontFamily: 'Inter_600SemiBold',
+    color: colors.text,
+    marginBottom: spacing[3],
+  },
+  erroContainer: {
+    marginHorizontal: spacing[6],
+    marginBottom: spacing[4],
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  erroTexto: {
+    color: colors.danger,
+    fontSize: typography.size.sm,
+    textAlign: 'center',
+    fontFamily: 'Inter_400Regular',
+  },
+  erroLink: {
+    color: colors.accent,
+    fontSize: typography.size.sm,
+    fontFamily: 'Inter_500Medium',
   },
 });

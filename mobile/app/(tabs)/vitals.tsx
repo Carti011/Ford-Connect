@@ -15,16 +15,8 @@ import Svg, { Line } from "react-native-svg";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../hooks/useAuth";
 import { buscarVeiculo } from "../../services/veiculo";
-import { buscarRecomendacoes } from "../../services/recomendacao";
-import { listarConcessionarias } from "../../services/concessionaria";
-import {
-  BellIcon,
-  OilIcon,
-  WiperIcon,
-} from "../../components/icons";
-import { CartaoRecomendacao } from "../../components/CartaoRecomendacao";
-import { CartaoConcessionaria } from "../../components/CartaoConcessionaria";
-import { Veiculo, Recomendacao, Concessionaria } from "../../types";
+import { BellIcon, OilIcon, WiperIcon } from "../../components/icons";
+import { Veiculo } from "../../types";
 import { colors } from "../../constants/colors";
 import { typography } from "../../constants/typography";
 import { spacing } from "../../constants/spacing";
@@ -66,22 +58,10 @@ function VistaTopCaminhao({
   const imgLeft = Math.round((containerW - imgW) / 2);
 
   const pneu = {
-    dtEsq: {
-      x: imgLeft + imgW * PNEU.dtEsq.x,
-      y: Math.round(imgH * PNEU.dtEsq.y),
-    },
-    dtDir: {
-      x: imgLeft + imgW * PNEU.dtDir.x,
-      y: Math.round(imgH * PNEU.dtDir.y),
-    },
-    trEsq: {
-      x: imgLeft + imgW * PNEU.trEsq.x,
-      y: Math.round(imgH * PNEU.trEsq.y),
-    },
-    trDir: {
-      x: imgLeft + imgW * PNEU.trDir.x,
-      y: Math.round(imgH * PNEU.trDir.y),
-    },
+    dtEsq: { x: imgLeft + imgW * PNEU.dtEsq.x, y: Math.round(imgH * PNEU.dtEsq.y) },
+    dtDir: { x: imgLeft + imgW * PNEU.dtDir.x, y: Math.round(imgH * PNEU.dtDir.y) },
+    trEsq: { x: imgLeft + imgW * PNEU.trEsq.x, y: Math.round(imgH * PNEU.trEsq.y) },
+    trDir: { x: imgLeft + imgW * PNEU.trDir.x, y: Math.round(imgH * PNEU.trDir.y) },
   };
 
   const bW = 48;
@@ -105,7 +85,6 @@ function VistaTopCaminhao({
 
   return (
     <View style={{ width: containerW, height: containerH }}>
-      {/* imagem do carro */}
       <Image
         source={require("../../assets/images/ranger-topo.webp")}
         style={{
@@ -118,69 +97,28 @@ function VistaTopCaminhao({
         resizeMode="contain"
       />
 
-      {/* overlay SVG com linhas */}
       <Svg
         width={containerW}
         height={containerH}
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
       >
-        <Line
-          x1={badge.dtEsq.x}
-          y1={badge.dtEsq.y}
-          x2={pneu.dtEsq.x}
-          y2={pneu.dtEsq.y}
-          stroke={colors.ok}
-          strokeWidth={1}
-          opacity={0.55}
-        />
-        <Line
-          x1={badge.dtDir.x}
-          y1={badge.dtDir.y}
-          x2={pneu.dtDir.x}
-          y2={pneu.dtDir.y}
-          stroke={colors.ok}
-          strokeWidth={1}
-          opacity={0.55}
-        />
-        <Line
-          x1={badge.trEsq.x}
-          y1={badge.trEsq.y}
-          x2={pneu.trEsq.x}
-          y2={pneu.trEsq.y}
-          stroke={colors.ok}
-          strokeWidth={1}
-          opacity={0.55}
-        />
-        <Line
-          x1={badge.trDir.x}
-          y1={badge.trDir.y}
-          x2={pneu.trDir.x}
-          y2={pneu.trDir.y}
-          stroke={colors.ok}
-          strokeWidth={1}
-          opacity={0.55}
-        />
+        <Line x1={badge.dtEsq.x} y1={badge.dtEsq.y} x2={pneu.dtEsq.x} y2={pneu.dtEsq.y} stroke={colors.ok} strokeWidth={1} opacity={0.55} />
+        <Line x1={badge.dtDir.x} y1={badge.dtDir.y} x2={pneu.dtDir.x} y2={pneu.dtDir.y} stroke={colors.ok} strokeWidth={1} opacity={0.55} />
+        <Line x1={badge.trEsq.x} y1={badge.trEsq.y} x2={pneu.trEsq.x} y2={pneu.trEsq.y} stroke={colors.ok} strokeWidth={1} opacity={0.55} />
+        <Line x1={badge.trDir.x} y1={badge.trDir.y} x2={pneu.trDir.x} y2={pneu.trDir.y} stroke={colors.ok} strokeWidth={1} opacity={0.55} />
       </Svg>
 
-      <View
-        style={[estilos.badgePressao, badgeStyle(badge.dtEsq.x, badge.dtEsq.y)]}
-      >
+      <View style={[estilos.badgePressao, badgeStyle(badge.dtEsq.x, badge.dtEsq.y)]}>
         <Text style={estilos.badgeTexto}>{pressaoDianteira}</Text>
       </View>
-      <View
-        style={[estilos.badgePressao, badgeStyle(badge.dtDir.x, badge.dtDir.y)]}
-      >
+      <View style={[estilos.badgePressao, badgeStyle(badge.dtDir.x, badge.dtDir.y)]}>
         <Text style={estilos.badgeTexto}>{pressaoDianteira}</Text>
       </View>
-      <View
-        style={[estilos.badgePressao, badgeStyle(badge.trEsq.x, badge.trEsq.y)]}
-      >
+      <View style={[estilos.badgePressao, badgeStyle(badge.trEsq.x, badge.trEsq.y)]}>
         <Text style={estilos.badgeTexto}>{pressaoTraseira}</Text>
       </View>
-      <View
-        style={[estilos.badgePressao, badgeStyle(badge.trDir.x, badge.trDir.y)]}
-      >
+      <View style={[estilos.badgePressao, badgeStyle(badge.trDir.x, badge.trDir.y)]}>
         <Text style={estilos.badgeTexto}>{pressaoTraseira}</Text>
       </View>
     </View>
@@ -210,20 +148,10 @@ function CardVital({
   );
 }
 
-function rotuloDoScore(score: number | null | undefined): { texto: string; cor: string } {
-  if (score == null) return { texto: "Indisponível", cor: colors.textDim };
-  if (score <= 50) return { texto: "Crítico", cor: colors.danger };
-  if (score <= 79) return { texto: "Atenção", cor: colors.warn };
-  return { texto: "Bom", cor: colors.ok };
-}
-
 export default function TelaVitais() {
   const router = useRouter();
   const { idVeiculo } = useAuth();
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
-  const [recomendacoes, setRecomendacoes] = useState<Recomendacao[]>([]);
-  const [concessionariaProxima, setConcessionariaProxima] =
-    useState<Concessionaria | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -235,14 +163,8 @@ export default function TelaVitais() {
     setCarregando(true);
     setErro(null);
     try {
-      const [veiculoDados, recomendacoesDados, concessionarias] = await Promise.all([
-        buscarVeiculo(idVeiculo),
-        buscarRecomendacoes(idVeiculo),
-        listarConcessionarias(),
-      ]);
+      const veiculoDados = await buscarVeiculo(idVeiculo);
       setVeiculo(veiculoDados);
-      setRecomendacoes(recomendacoesDados);
-      setConcessionariaProxima(concessionarias[0] ?? null);
     } catch (e: any) {
       setErro(
         e?.response?.status === 401
@@ -266,13 +188,9 @@ export default function TelaVitais() {
     );
   }
 
-  const modeloTexto = veiculo ? `${veiculo.marca} ${veiculo.modelo}` : "—";
   const kmFormatado = veiculo?.quilometragem
     ? veiculo.quilometragem.toLocaleString("pt-BR")
     : "—";
-
-  const score = veiculo?.scoreSaude ?? null;
-  const rotuloScore = rotuloDoScore(score);
 
   return (
     <View style={estilos.tela}>
@@ -294,25 +212,16 @@ export default function TelaVitais() {
           </Pressable>
         </SafeAreaView>
 
-        {/* header com score de saude */}
         <View style={estilos.header}>
-          <Text style={estilos.subtitulo}>{modeloTexto}</Text>
-          <View style={estilos.scoreLinha}>
-            <Text style={estilos.scoreNumero}>{score ?? "—"}</Text>
-            <Text style={estilos.scoreEscala}>/100</Text>
-          </View>
-          <Text style={[estilos.scoreRotulo, { color: rotuloScore.cor }]}>
-            Saúde do veículo · {rotuloScore.texto}
-          </Text>
+          <Text style={estilos.subtitulo}>Visão geral</Text>
+          <Text style={estilos.titulo}>Dashboard</Text>
         </View>
 
-        {/* odômetro */}
         <View style={estilos.odometroSecao}>
           <Text style={estilos.odometroLabel}>Odômetro</Text>
           <Text style={estilos.odometroValor}>{kmFormatado} km</Text>
         </View>
 
-        {/* erro */}
         {erro && (
           <Pressable onPress={carregar} style={estilos.erroContainer}>
             <Text style={estilos.erroTexto}>{erro}</Text>
@@ -320,7 +229,6 @@ export default function TelaVitais() {
           </Pressable>
         )}
 
-        {/* vista top com badges de pressão e linhas */}
         <View style={estilos.truckSecao}>
           <VistaTopCaminhao
             pressaoDianteira={VITALS.pressaoDianteira}
@@ -328,7 +236,6 @@ export default function TelaVitais() {
           />
         </View>
 
-        {/* legenda pressão */}
         <Text style={estilos.pressaoLegenda}>
           {"Pressão ideal dos pneus frios:\n"}
           <Text style={estilos.pressaoDestaque}>
@@ -336,7 +243,6 @@ export default function TelaVitais() {
           </Text>
         </Text>
 
-        {/* cards vitais */}
         <View style={estilos.vitaisGrid}>
           <CardVital
             icone={<OilIcon size={18} color={colors.ok} />}
@@ -350,37 +256,6 @@ export default function TelaVitais() {
             sub={VITALS.fluidoLimpador}
           />
         </View>
-
-        {/* recomendações */}
-        <View style={estilos.recomendacoesSecao}>
-          <Text style={estilos.recomendacoesTitulo}>
-            O que precisa fazer agora
-          </Text>
-          {recomendacoes.length === 0 ? (
-            <Text style={estilos.recomendacoesVazio}>
-              Nenhuma recomendação no momento. Seu veículo está em dia.
-            </Text>
-          ) : (
-            <View style={estilos.recomendacoesLista}>
-              {recomendacoes.map((rec) => (
-                <CartaoRecomendacao key={rec.id} recomendacao={rec} />
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* concessionária mais próxima */}
-        {concessionariaProxima ? (
-          <View style={estilos.concessionariaSecao}>
-            <Text style={estilos.concessionariaTitulo}>
-              Concessionária mais próxima
-            </Text>
-            <CartaoConcessionaria
-              concessionaria={concessionariaProxima}
-              onAgendar={() => router.push("/agendar-servico" as never)}
-            />
-          </View>
-        ) : null}
 
         <View style={{ height: layout.tabbarHeight }} />
       </ScrollView>
@@ -402,8 +277,6 @@ const estilos = StyleSheet.create({
   scroll: {
     flexGrow: 1,
   },
-
-  // top chrome
   topChrome: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -428,8 +301,6 @@ const estilos = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
-  // header
   header: {
     paddingHorizontal: spacing[6],
     paddingTop: spacing[5],
@@ -442,38 +313,14 @@ const estilos = StyleSheet.create({
     marginBottom: spacing[2],
     letterSpacing: 0.2,
   },
-  scoreLinha: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: spacing[1],
-  },
-  scoreNumero: {
-    fontSize: typography.size["4xl"],
+  titulo: {
+    fontSize: typography.size["3xl"],
     fontWeight: typography.weight.bold,
     fontFamily: "Inter_700Bold",
     color: colors.text,
     letterSpacing: typography.letterSpacing.tight,
-    lineHeight: Math.round(
-      typography.size["4xl"] * typography.lineHeight.tight,
-    ),
+    lineHeight: Math.round(typography.size["3xl"] * typography.lineHeight.snug),
   },
-  scoreEscala: {
-    fontSize: typography.size.xl,
-    fontWeight: typography.weight.medium,
-    fontFamily: "Inter_500Medium",
-    color: colors.textDim,
-    marginBottom: spacing[2],
-  },
-  scoreRotulo: {
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
-    fontFamily: "Inter_600SemiBold",
-    marginTop: spacing[1],
-    letterSpacing: typography.letterSpacing.loose,
-    textTransform: "uppercase",
-  },
-
-  // odômetro
   odometroSecao: {
     alignItems: "center",
     paddingVertical: spacing[5],
@@ -491,14 +338,10 @@ const estilos = StyleSheet.create({
     color: colors.text,
     letterSpacing: -0.4,
   },
-
-  // seção truck
   truckSecao: {
     alignItems: "center",
     marginBottom: spacing[3],
   },
-
-  // badge de pressão
   badgePressao: {
     borderRadius: radius.sm,
     backgroundColor: colors.surface,
@@ -513,8 +356,6 @@ const estilos = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     color: colors.ok,
   },
-
-  // legenda pressão
   pressaoLegenda: {
     textAlign: "center",
     fontSize: typography.size.sm,
@@ -529,8 +370,6 @@ const estilos = StyleSheet.create({
     fontWeight: typography.weight.semibold,
     fontFamily: "Inter_600SemiBold",
   },
-
-  // grid vitais
   vitaisGrid: {
     flexDirection: "row",
     marginHorizontal: spacing[6],
@@ -569,43 +408,6 @@ const estilos = StyleSheet.create({
     color: colors.textDim,
     fontFamily: "Inter_400Regular",
   },
-
-  // recomendações
-  recomendacoesSecao: {
-    marginHorizontal: spacing[6],
-    marginBottom: spacing[5],
-  },
-  recomendacoesTitulo: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold,
-    fontFamily: "Inter_600SemiBold",
-    color: colors.text,
-    marginBottom: spacing[3],
-  },
-  recomendacoesLista: {
-    gap: spacing[3],
-  },
-  recomendacoesVazio: {
-    fontSize: typography.size.sm,
-    color: colors.textDim,
-    fontFamily: "Inter_400Regular",
-    fontStyle: "italic",
-  },
-
-  // concessionária
-  concessionariaSecao: {
-    marginHorizontal: spacing[6],
-    marginBottom: spacing[5],
-  },
-  concessionariaTitulo: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold,
-    fontFamily: "Inter_600SemiBold",
-    color: colors.text,
-    marginBottom: spacing[3],
-  },
-
-  // erro
   erroContainer: {
     marginHorizontal: spacing[6],
     marginBottom: spacing[4],
