@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { AuthProvider, useAuth } from '../hooks/useAuth';
+import { resetarDemo } from '../services/demo';
 import { colors } from '../constants/colors';
 
 function NavigationGuard() {
@@ -55,7 +56,14 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
-  if (!fontsCarregadas) {
+  // reset da demo a cada cold start: cada abertura do app comeca do zero
+  const [resetConcluido, setResetConcluido] = useState(false);
+
+  useEffect(() => {
+    resetarDemo().finally(() => setResetConcluido(true));
+  }, []);
+
+  if (!fontsCarregadas || !resetConcluido) {
     return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
   }
 
