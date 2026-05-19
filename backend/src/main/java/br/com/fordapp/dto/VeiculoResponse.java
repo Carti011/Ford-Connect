@@ -1,6 +1,7 @@
 package br.com.fordapp.dto;
 
 import br.com.fordapp.model.Veiculo;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public class VeiculoResponse {
@@ -20,6 +21,9 @@ public class VeiculoResponse {
     private Boolean desembacarParabrisa;
     private Boolean bancoAquecido;
     private Boolean notificar;
+    private Integer scoreSaude;
+    private LocalDate garantiaDataLimite;
+    private Integer garantiaKmLimite;
 
     public VeiculoResponse() {}
 
@@ -40,6 +44,9 @@ public class VeiculoResponse {
         dto.desembacarParabrisa = veiculo.getDesembacarParabrisa();
         dto.bancoAquecido = veiculo.getBancoAquecido();
         dto.notificar = veiculo.getNotificar();
+        dto.scoreSaude = veiculo.getScoreSaude();
+        dto.garantiaDataLimite = veiculo.getGarantiaDataLimite();
+        dto.garantiaKmLimite = veiculo.getGarantiaKmLimite();
         return dto;
     }
 
@@ -58,6 +65,9 @@ public class VeiculoResponse {
     public Boolean getDesembacarParabrisa() { return desembacarParabrisa; }
     public Boolean getBancoAquecido() { return bancoAquecido; }
     public Boolean getNotificar() { return notificar; }
+    public Integer getScoreSaude() { return scoreSaude; }
+    public LocalDate getGarantiaDataLimite() { return garantiaDataLimite; }
+    public Integer getGarantiaKmLimite() { return garantiaKmLimite; }
 
     public void setId(UUID id) { this.id = id; }
     public void setNomeProprietario(String nomeProprietario) { this.nomeProprietario = nomeProprietario; }
@@ -74,4 +84,7 @@ public class VeiculoResponse {
     public void setDesembacarParabrisa(Boolean desembacarParabrisa) { this.desembacarParabrisa = desembacarParabrisa; }
     public void setBancoAquecido(Boolean bancoAquecido) { this.bancoAquecido = bancoAquecido; }
     public void setNotificar(Boolean notificar) { this.notificar = notificar; }
+    public void setScoreSaude(Integer scoreSaude) { this.scoreSaude = scoreSaude; }
+    public void setGarantiaDataLimite(LocalDate garantiaDataLimite) { this.garantiaDataLimite = garantiaDataLimite; }
+    public void setGarantiaKmLimite(Integer garantiaKmLimite) { this.garantiaKmLimite = garantiaKmLimite; }
 }

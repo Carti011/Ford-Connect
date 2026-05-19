@@ -86,6 +86,9 @@ function veiculoSeed() {
     desembacarParabrisa: true,
     bancoAquecido: false,
     notificar: true,
+    scoreSaude: 78,
+    garantiaDataLimite: '2026-10-18',
+    garantiaKmLimite: 30000,
   };
 }
 

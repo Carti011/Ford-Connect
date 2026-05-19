@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { AuthProvider, useAuth } from '../hooks/useAuth';
+import { resetarDemo } from '../services/demo';
 import { colors } from '../constants/colors';
 
 function NavigationGuard() {
@@ -13,7 +14,7 @@ function NavigationGuard() {
   useEffect(() => {
     if (carregando) return;
 
-    const ROTAS_PROTEGIDAS = new Set(['(tabs)', 'perfil', 'notificacoes', 'localizacao', 'iniciando-motor', 'climatizacao', 'trava', 'agendar']);
+    const ROTAS_PROTEGIDAS = new Set(['(tabs)', 'perfil', 'notificacoes', 'localizacao', 'iniciando-motor', 'climatizacao', 'trava', 'agendar', 'agendar-servico']);
     const estaEmRotaProtegida = ROTAS_PROTEGIDAS.has(segments[0] as string);
 
     if (!estaAutenticado && estaEmRotaProtegida) {
@@ -42,6 +43,7 @@ function NavigationGuard() {
       <Stack.Screen name="climatizacao" options={{ headerShown: false }} />
       <Stack.Screen name="trava" options={{ headerShown: false }} />
       <Stack.Screen name="agendar" options={{ headerShown: false }} />
+      <Stack.Screen name="agendar-servico" options={{ headerShown: false }} />
     </Stack>
   );
 }
@@ -54,7 +56,14 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
-  if (!fontsCarregadas) {
+  // reset da demo a cada cold start: cada abertura do app comeca do zero
+  const [resetConcluido, setResetConcluido] = useState(false);
+
+  useEffect(() => {
+    resetarDemo().finally(() => setResetConcluido(true));
+  }, []);
+
+  if (!fontsCarregadas || !resetConcluido) {
     return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
   }
 
