@@ -15,6 +15,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { buscarVeiculo } from '../../services/veiculo';
 import { buscarRecomendacoes } from '../../services/recomendacao';
 import { listarConcessionarias } from '../../services/concessionaria';
+import { buscarManutencoes } from '../../services/manutencao';
 import { BellIcon } from '../../components/icons';
 import { CartaoRecomendacao } from '../../components/CartaoRecomendacao';
 import { CartaoConcessionaria } from '../../components/CartaoConcessionaria';
@@ -22,7 +23,8 @@ import { CartaoScoreSaude } from '../../components/CartaoScoreSaude';
 import { CartaoGarantia } from '../../components/CartaoGarantia';
 import { BannerAtrasada } from '../../components/BannerAtrasada';
 import { CtaAgendarTotalizador } from '../../components/CtaAgendarTotalizador';
-import { Veiculo, Recomendacao, Concessionaria } from '../../types';
+import { CartaoFidelidade } from '../../components/CartaoFidelidade';
+import { Veiculo, Recomendacao, Concessionaria, RegistroManutencao } from '../../types';
 import { colors } from '../../constants/colors';
 import { typography } from '../../constants/typography';
 import { spacing } from '../../constants/spacing';
@@ -36,6 +38,7 @@ export default function TelaManutencao() {
   const [recomendacoes, setRecomendacoes] = useState<Recomendacao[]>([]);
   const [concessionariaProxima, setConcessionariaProxima] =
     useState<Concessionaria | null>(null);
+  const [manutencoes, setManutencoes] = useState<RegistroManutencao[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -47,14 +50,17 @@ export default function TelaManutencao() {
     setCarregando(true);
     setErro(null);
     try {
-      const [veiculoDados, recomendacoesDados, concessionarias] = await Promise.all([
-        buscarVeiculo(idVeiculo),
-        buscarRecomendacoes(idVeiculo),
-        listarConcessionarias(),
-      ]);
+      const [veiculoDados, recomendacoesDados, concessionarias, manutencoesDados] =
+        await Promise.all([
+          buscarVeiculo(idVeiculo),
+          buscarRecomendacoes(idVeiculo),
+          listarConcessionarias(),
+          buscarManutencoes(idVeiculo),
+        ]);
       setVeiculo(veiculoDados);
       setRecomendacoes(recomendacoesDados);
       setConcessionariaProxima(concessionarias[0] ?? null);
+      setManutencoes(manutencoesDados);
     } catch (e: any) {
       setErro(
         e?.response?.status === 401
@@ -159,6 +165,12 @@ export default function TelaManutencao() {
           </View>
         ) : null}
 
+        {veiculo && manutencoes.length > 0 ? (
+          <View style={estilos.fidelidadeSecao}>
+            <CartaoFidelidade veiculo={veiculo} manutencoes={manutencoes} />
+          </View>
+        ) : null}
+
         <View style={{ height: layout.tabbarHeight }} />
       </ScrollView>
     </View>
@@ -233,6 +245,10 @@ const estilos = StyleSheet.create({
     fontStyle: 'italic',
   },
   concessionariaSecao: {
+    marginHorizontal: spacing[6],
+    marginBottom: spacing[5],
+  },
+  fidelidadeSecao: {
     marginHorizontal: spacing[6],
     marginBottom: spacing[5],
   },
