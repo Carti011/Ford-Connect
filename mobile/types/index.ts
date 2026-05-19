@@ -92,6 +92,7 @@ export interface Recomendacao {
   prioridade: Prioridade;
   custoMin: number | null;
   custoMax: number | null;
+  porQueImporta: string | null;
   resolvido: boolean;
   status: StatusRecomendacao;
 }
