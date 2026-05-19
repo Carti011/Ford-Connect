@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -64,6 +64,7 @@ function rotuloDataLonga(iso: string): string {
 export default function TelaAgendarServico() {
   const router = useRouter();
   const { idVeiculo } = useAuth();
+  const scrollRef = useRef<ScrollView>(null);
 
   const [recomendacoes, setRecomendacoes] = useState<Recomendacao[]>([]);
   const [concessionarias, setConcessionarias] = useState<Concessionaria[]>([]);
@@ -171,7 +172,13 @@ export default function TelaAgendarServico() {
         <View style={estilos.placeholderTopo} />
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={estilos.scroll}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={estilos.scroll}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        automaticallyAdjustKeyboardInsets
+      >
         {/* serviços */}
         <View style={estilos.secao}>
           <Text style={estilos.tituloSecao}>Quais serviços incluir?</Text>
@@ -285,6 +292,9 @@ export default function TelaAgendarServico() {
             placeholder="Ex: trazer carro com tanque cheio"
             placeholderTextColor={colors.textMuted}
             style={estilos.textInput}
+            onFocus={() => {
+              setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150);
+            }}
           />
         </View>
 
