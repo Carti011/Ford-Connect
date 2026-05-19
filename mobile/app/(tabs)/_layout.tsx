@@ -1,26 +1,13 @@
 import { Tabs } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { StyleSheet } from 'react-native';
 import { VehicleIcon, GaugeIcon, ClockIcon } from '../../components/icons';
-import { colors } from '../../constants/colors';
-import { layout } from '../../constants/layout';
+import { TabBarPersonalizada } from '../../components/TabBarPersonalizada';
 
 export default function TabLayout() {
   return (
     <Tabs
+      tabBar={(props) => <TabBarPersonalizada {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.text,
-        tabBarInactiveTintColor: colors.textMuted,
-        tabBarShowLabel: false,
-        tabBarStyle: estilos.tabBar,
-        tabBarBackground: () => (
-          <LinearGradient
-            colors={['transparent', colors.bg]}
-            locations={[0, 0.4]}
-            style={StyleSheet.absoluteFill}
-          />
-        ),
       }}
     >
       <Tabs.Screen
@@ -44,14 +31,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const estilos = StyleSheet.create({
-  tabBar: {
-    position: 'absolute',
-    backgroundColor: 'transparent',
-    borderTopWidth: 0,
-    elevation: 0,
-    shadowOpacity: 0,
-    height: layout.tabbarHeight,
-  },
-});
