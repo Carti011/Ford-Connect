@@ -46,12 +46,15 @@ function recomendacao(overrides: Partial<Recomendacao> = {}): Recomendacao {
   };
 }
 
+const SEM_AGENDAMENTOS = new Set<string>();
+
 describe('CartaoGarantia', () => {
   it('exibe estado normal quando nao ha recomendacao obrigatoria atrasada', () => {
     render(
       <CartaoGarantia
         veiculo={veiculoBase()}
         recomendacoes={[recomendacao({ obrigatoria: true, status: 'em_dia' })]}
+        recomendacaoIdsAgendadas={SEM_AGENDAMENTOS}
       />
     );
 
@@ -60,7 +63,7 @@ describe('CartaoGarantia', () => {
     expect(screen.queryByText(/perda de cobertura/)).toBeNull();
   });
 
-  it('exibe estado de risco quando ha recomendacao obrigatoria atrasada', () => {
+  it('exibe estado de risco quando ha recomendacao obrigatoria atrasada nao agendada', () => {
     render(
       <CartaoGarantia
         veiculo={veiculoBase()}
@@ -68,6 +71,7 @@ describe('CartaoGarantia', () => {
           recomendacao({ obrigatoria: true, status: 'atrasada' }),
           recomendacao({ obrigatoria: false, status: 'em_dia' }),
         ]}
+        recomendacaoIdsAgendadas={SEM_AGENDAMENTOS}
       />
     );
 
@@ -75,11 +79,28 @@ describe('CartaoGarantia', () => {
     expect(screen.getByText(/perda de cobertura/)).toBeTruthy();
   });
 
+  it('exibe estado de revisao agendada quando a obrigatoria atrasada esta agendada', () => {
+    const obrigatoria = recomendacao({ obrigatoria: true, status: 'atrasada' });
+
+    render(
+      <CartaoGarantia
+        veiculo={veiculoBase()}
+        recomendacoes={[obrigatoria]}
+        recomendacaoIdsAgendadas={new Set([obrigatoria.id])}
+      />
+    );
+
+    expect(screen.getByText('Revisão agendada')).toBeTruthy();
+    expect(screen.getByText(/garantia segue protegida/)).toBeTruthy();
+    expect(screen.queryByText('Garantia em risco')).toBeNull();
+  });
+
   it('nao exibe estado de risco quando recomendacao atrasada nao e obrigatoria', () => {
     render(
       <CartaoGarantia
         veiculo={veiculoBase()}
         recomendacoes={[recomendacao({ obrigatoria: false, status: 'atrasada' })]}
+        recomendacaoIdsAgendadas={SEM_AGENDAMENTOS}
       />
     );
 
@@ -92,6 +113,7 @@ describe('CartaoGarantia', () => {
       <CartaoGarantia
         veiculo={veiculoBase({ garantiaDataLimite: null, garantiaKmLimite: null })}
         recomendacoes={[]}
+        recomendacaoIdsAgendadas={SEM_AGENDAMENTOS}
       />
     );
 
@@ -103,6 +125,7 @@ describe('CartaoGarantia', () => {
       <CartaoGarantia
         veiculo={veiculoBase({ quilometragem: 12000, garantiaKmLimite: 30000 })}
         recomendacoes={[]}
+        recomendacaoIdsAgendadas={SEM_AGENDAMENTOS}
       />
     );
 

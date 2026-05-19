@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,20 +10,28 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
 import { buscarVeiculo } from '../../services/veiculo';
 import { buscarRecomendacoes } from '../../services/recomendacao';
 import { listarConcessionarias } from '../../services/concessionaria';
 import { buscarManutencoes } from '../../services/manutencao';
+import { listarAgendamentosServico } from '../../services/agendamentoServico';
 import { BellIcon } from '../../components/icons';
 import { CartaoRecomendacao } from '../../components/CartaoRecomendacao';
 import { CartaoConcessionaria } from '../../components/CartaoConcessionaria';
 import { CartaoScoreSaude } from '../../components/CartaoScoreSaude';
 import { CartaoGarantia } from '../../components/CartaoGarantia';
 import { BannerAtrasada } from '../../components/BannerAtrasada';
+import { CartaoAgendamentoConfirmado } from '../../components/CartaoAgendamentoConfirmado';
 import { CartaoFidelidade } from '../../components/CartaoFidelidade';
-import { Veiculo, Recomendacao, Concessionaria, RegistroManutencao } from '../../types';
+import {
+  Veiculo,
+  Recomendacao,
+  Concessionaria,
+  RegistroManutencao,
+  AgendamentoServico,
+} from '../../types';
 import { colors } from '../../constants/colors';
 import { typography } from '../../constants/typography';
 import { spacing } from '../../constants/spacing';
@@ -38,6 +46,7 @@ export default function TelaManutencao() {
   const [concessionariaProxima, setConcessionariaProxima] =
     useState<Concessionaria | null>(null);
   const [manutencoes, setManutencoes] = useState<RegistroManutencao[]>([]);
+  const [agendamentos, setAgendamentos] = useState<AgendamentoServico[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -49,17 +58,24 @@ export default function TelaManutencao() {
     setCarregando(true);
     setErro(null);
     try {
-      const [veiculoDados, recomendacoesDados, concessionarias, manutencoesDados] =
-        await Promise.all([
-          buscarVeiculo(idVeiculo),
-          buscarRecomendacoes(idVeiculo),
-          listarConcessionarias(),
-          buscarManutencoes(idVeiculo),
-        ]);
+      const [
+        veiculoDados,
+        recomendacoesDados,
+        concessionarias,
+        manutencoesDados,
+        agendamentosDados,
+      ] = await Promise.all([
+        buscarVeiculo(idVeiculo),
+        buscarRecomendacoes(idVeiculo),
+        listarConcessionarias(),
+        buscarManutencoes(idVeiculo),
+        listarAgendamentosServico(idVeiculo),
+      ]);
       setVeiculo(veiculoDados);
       setRecomendacoes(recomendacoesDados);
       setConcessionariaProxima(concessionarias[0] ?? null);
       setManutencoes(manutencoesDados);
+      setAgendamentos(agendamentosDados);
     } catch (e: any) {
       setErro(
         e?.response?.status === 401
@@ -71,9 +87,11 @@ export default function TelaManutencao() {
     }
   }, [idVeiculo]);
 
-  useEffect(() => {
-    carregar();
-  }, [carregar]);
+  useFocusEffect(
+    useCallback(() => {
+      carregar();
+    }, [carregar]),
+  );
 
   if (carregando) {
     return (
@@ -85,6 +103,11 @@ export default function TelaManutencao() {
 
   const modeloTexto = veiculo ? `${veiculo.marca} ${veiculo.modelo}` : '—';
   const score = veiculo?.scoreSaude ?? null;
+
+  const agendamento = agendamentos[0] ?? null;
+  const recomendacaoIdsAgendadas = new Set<string>(
+    agendamentos.flatMap((ag) => ag.recomendacoes.map((r) => r.id)),
+  );
 
   return (
     <View style={estilos.tela}>
@@ -112,7 +135,11 @@ export default function TelaManutencao() {
 
         {veiculo ? (
           <View style={estilos.garantiaSecao}>
-            <CartaoGarantia veiculo={veiculo} recomendacoes={recomendacoes} />
+            <CartaoGarantia
+              veiculo={veiculo}
+              recomendacoes={recomendacoes}
+              recomendacaoIdsAgendadas={recomendacaoIdsAgendadas}
+            />
           </View>
         ) : null}
 
@@ -149,13 +176,21 @@ export default function TelaManutencao() {
             <>
               <View style={estilos.recomendacoesLista}>
                 {recomendacoes.map((rec) => (
-                  <CartaoRecomendacao key={rec.id} recomendacao={rec} />
+                  <CartaoRecomendacao
+                    key={rec.id}
+                    recomendacao={rec}
+                    agendada={recomendacaoIdsAgendadas.has(rec.id)}
+                  />
                 ))}
               </View>
-              <BannerAtrasada
-                recomendacoes={recomendacoes}
-                onPress={() => router.push('/agendar-servico')}
-              />
+              {agendamento ? (
+                <CartaoAgendamentoConfirmado agendamento={agendamento} />
+              ) : (
+                <BannerAtrasada
+                  recomendacoes={recomendacoes}
+                  onPress={() => router.push('/agendar-servico')}
+                />
+              )}
             </>
           )}
         </View>

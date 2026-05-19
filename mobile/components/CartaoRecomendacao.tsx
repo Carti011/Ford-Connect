@@ -9,6 +9,7 @@ import { WrenchIcon, CaretIcon } from './icons';
 
 interface Props {
   recomendacao: Recomendacao;
+  agendada?: boolean;
 }
 
 const corStatus: Record<StatusRecomendacao, string> = {
@@ -43,7 +44,7 @@ function formatarCusto(min: number | null, max: number | null): string | null {
   return formatar((min ?? max) as number);
 }
 
-export function CartaoRecomendacao({ recomendacao }: Props) {
+export function CartaoRecomendacao({ recomendacao, agendada = false }: Props) {
   const [expandido, setExpandido] = useState(false);
   const cor = corStatus[recomendacao.status];
   const prazo = formatarPrazo(recomendacao);
@@ -67,6 +68,11 @@ export function CartaoRecomendacao({ recomendacao }: Props) {
                 {recomendacao.obrigatoria ? 'Obrigatória' : 'Opcional'}
               </Text>
             </View>
+            {agendada ? (
+              <View style={[estilos.badge, { backgroundColor: colors.okSoft, borderColor: colors.ok }]}>
+                <Text style={[estilos.badgeTexto, { color: colors.ok }]}>Agendada</Text>
+              </View>
+            ) : null}
           </View>
         </View>
       </View>

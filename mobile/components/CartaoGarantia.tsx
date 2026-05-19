@@ -10,6 +10,7 @@ import { ShieldIcon } from './icons';
 interface Props {
   veiculo: Veiculo;
   recomendacoes: Recomendacao[];
+  recomendacaoIdsAgendadas: Set<string>;
 }
 
 function formatarData(iso: string): string {
@@ -34,7 +35,7 @@ function rotuloTempoRestante(dias: number): string {
   return anos === 1 ? 'Falta 1 ano' : `Faltam ${anos} anos`;
 }
 
-export function CartaoGarantia({ veiculo, recomendacoes }: Props) {
+export function CartaoGarantia({ veiculo, recomendacoes, recomendacaoIdsAgendadas }: Props) {
   const dataLimite = veiculo.garantiaDataLimite;
   const kmLimite = veiculo.garantiaKmLimite;
 
@@ -42,9 +43,15 @@ export function CartaoGarantia({ veiculo, recomendacoes }: Props) {
     return null;
   }
 
-  const emRisco = recomendacoes.some(
+  const obrigatoriasAtrasadas = recomendacoes.filter(
     (r) => r.obrigatoria && r.status === 'atrasada'
   );
+  const emRisco =
+    obrigatoriasAtrasadas.length > 0 &&
+    !obrigatoriasAtrasadas.every((r) => recomendacaoIdsAgendadas.has(r.id));
+  const revisaoAgendada =
+    obrigatoriasAtrasadas.length > 0 &&
+    obrigatoriasAtrasadas.every((r) => recomendacaoIdsAgendadas.has(r.id));
 
   const dias = dataLimite ? calcularDiasAteData(dataLimite) : null;
   const kmRestantes =
@@ -52,8 +59,17 @@ export function CartaoGarantia({ veiculo, recomendacoes }: Props) {
       ? kmLimite - veiculo.quilometragem
       : null;
 
-  const cor = emRisco ? colors.danger : colors.accent;
-  const corFundo = emRisco ? colors.dangerSoft : colors.accentSoft;
+  const cor = emRisco ? colors.danger : revisaoAgendada ? colors.ok : colors.accent;
+  const corFundo = emRisco
+    ? colors.dangerSoft
+    : revisaoAgendada
+    ? colors.okSoft
+    : colors.accentSoft;
+  const tituloCartao = emRisco
+    ? 'Garantia em risco'
+    : revisaoAgendada
+    ? 'Revisão agendada'
+    : 'Garantia ativa';
 
   return (
     <View style={[estilos.cartao, { borderColor: cor }]}>
@@ -62,9 +78,7 @@ export function CartaoGarantia({ veiculo, recomendacoes }: Props) {
           <ShieldIcon size={18} color={cor} />
         </View>
         <View style={estilos.tituloBloco}>
-          <Text style={estilos.titulo}>
-            {emRisco ? 'Garantia em risco' : 'Garantia ativa'}
-          </Text>
+          <Text style={estilos.titulo}>{tituloCartao}</Text>
           {dias !== null ? (
             <Text style={[estilos.subtitulo, { color: cor }]}>
               {rotuloTempoRestante(dias)}
@@ -96,9 +110,17 @@ export function CartaoGarantia({ veiculo, recomendacoes }: Props) {
       </View>
 
       {emRisco ? (
-        <View style={estilos.aviso}>
+        <View style={[estilos.aviso, { backgroundColor: colors.dangerSoft }]}>
           <Text style={estilos.avisoTexto}>
             Revisão obrigatória atrasada. Não fazer a revisão na rede oficial pode levar à perda de cobertura da garantia.
+          </Text>
+        </View>
+      ) : null}
+
+      {revisaoAgendada ? (
+        <View style={[estilos.aviso, { backgroundColor: colors.okSoft }]}>
+          <Text style={estilos.avisoTexto}>
+            Revisão obrigatória agendada na rede oficial. Sua garantia segue protegida.
           </Text>
         </View>
       ) : null}
@@ -163,7 +185,6 @@ const estilos = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
   },
   aviso: {
-    backgroundColor: colors.dangerSoft,
     borderRadius: radius.md,
     padding: spacing[3],
   },
