@@ -18,19 +18,13 @@ import { listarConcessionarias } from '../../services/concessionaria';
 import { BellIcon } from '../../components/icons';
 import { CartaoRecomendacao } from '../../components/CartaoRecomendacao';
 import { CartaoConcessionaria } from '../../components/CartaoConcessionaria';
+import { CartaoScoreSaude } from '../../components/CartaoScoreSaude';
 import { Veiculo, Recomendacao, Concessionaria } from '../../types';
 import { colors } from '../../constants/colors';
 import { typography } from '../../constants/typography';
 import { spacing } from '../../constants/spacing';
 import { radius } from '../../constants/radius';
 import { layout } from '../../constants/layout';
-
-function rotuloDoScore(score: number | null | undefined): { texto: string; cor: string } {
-  if (score == null) return { texto: 'Indisponível', cor: colors.textDim };
-  if (score <= 50) return { texto: 'Crítico', cor: colors.danger };
-  if (score <= 79) return { texto: 'Atenção', cor: colors.warn };
-  return { texto: 'Bom', cor: colors.ok };
-}
 
 export default function TelaManutencao() {
   const router = useRouter();
@@ -83,7 +77,6 @@ export default function TelaManutencao() {
 
   const modeloTexto = veiculo ? `${veiculo.marca} ${veiculo.modelo}` : '—';
   const score = veiculo?.scoreSaude ?? null;
-  const rotuloScore = rotuloDoScore(score);
 
   return (
     <View style={estilos.tela}>
@@ -105,15 +98,8 @@ export default function TelaManutencao() {
           </Pressable>
         </SafeAreaView>
 
-        <View style={estilos.header}>
-          <Text style={estilos.subtitulo}>{modeloTexto}</Text>
-          <View style={estilos.scoreLinha}>
-            <Text style={estilos.scoreNumero}>{score ?? '—'}</Text>
-            <Text style={estilos.scoreEscala}>/100</Text>
-          </View>
-          <Text style={[estilos.scoreRotulo, { color: rotuloScore.cor }]}>
-            Saúde do veículo · {rotuloScore.texto}
-          </Text>
+        <View style={estilos.scoreSecao}>
+          <CartaoScoreSaude score={score} modelo={modeloTexto} />
         </View>
 
         {erro && (
@@ -196,45 +182,10 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  header: {
+  scoreSecao: {
     paddingHorizontal: spacing[6],
     paddingTop: spacing[5],
     paddingBottom: spacing[5],
-  },
-  subtitulo: {
-    fontSize: typography.size.sm,
-    color: colors.textDim,
-    fontFamily: 'Inter_400Regular',
-    marginBottom: spacing[2],
-    letterSpacing: 0.2,
-  },
-  scoreLinha: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: spacing[1],
-  },
-  scoreNumero: {
-    fontSize: typography.size['4xl'],
-    fontWeight: typography.weight.bold,
-    fontFamily: 'Inter_700Bold',
-    color: colors.text,
-    letterSpacing: typography.letterSpacing.tight,
-    lineHeight: Math.round(typography.size['4xl'] * typography.lineHeight.tight),
-  },
-  scoreEscala: {
-    fontSize: typography.size.xl,
-    fontWeight: typography.weight.medium,
-    fontFamily: 'Inter_500Medium',
-    color: colors.textDim,
-    marginBottom: spacing[2],
-  },
-  scoreRotulo: {
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
-    fontFamily: 'Inter_600SemiBold',
-    marginTop: spacing[1],
-    letterSpacing: typography.letterSpacing.loose,
-    textTransform: 'uppercase',
   },
   recomendacoesSecao: {
     marginHorizontal: spacing[6],
