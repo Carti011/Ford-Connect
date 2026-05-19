@@ -131,7 +131,7 @@ export default function TelaManutencao() {
 
           <BannerAtrasada
             recomendacoes={recomendacoes}
-            onPress={() => {}}
+            onPress={() => router.push('/agendar-servico')}
           />
 
           {recomendacoes.length === 0 ? (
@@ -147,7 +147,7 @@ export default function TelaManutencao() {
               </View>
               <CtaAgendarTotalizador
                 recomendacoes={recomendacoes}
-                onPress={() => {}}
+                onPress={() => router.push('/agendar-servico')}
               />
             </>
           )}
@@ -160,7 +160,7 @@ export default function TelaManutencao() {
             </Text>
             <CartaoConcessionaria
               concessionaria={concessionariaProxima}
-              onAgendar={() => {}}
+              onAgendar={() => router.push('/agendar-servico')}
             />
           </View>
         ) : null}
