@@ -123,6 +123,7 @@ export default function TelaManutencao() {
             </Text>
             <CartaoConcessionaria
               concessionaria={concessionariaProxima}
+              rotuloBotao={`Agendar na ${concessionariaProxima.nome}`}
               onAgendar={() => router.push('/agendar-servico')}
             />
           </View>

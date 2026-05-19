@@ -41,47 +41,43 @@ describe('BannerAtrasada', () => {
     expect(toJSON()).toBeNull();
   });
 
-  it('renderiza com o titulo da unica atrasada e sufixo Atrasada', () => {
+  it('mostra label no singular quando ha uma atrasada', () => {
     render(
       <BannerAtrasada
         recomendacoes={[
-          recomendacao({ titulo: 'Revisão dos 10.000 km', status: 'atrasada' }),
-          recomendacao({ titulo: 'Pastilha de freio', status: 'proxima' }),
+          recomendacao({ status: 'atrasada' }),
+          recomendacao({ status: 'proxima' }),
         ]}
         onPress={onPressMock}
       />
     );
 
-    expect(screen.getByText('Revisão dos 10.000 km')).toBeTruthy();
-    expect(screen.getByText(/Atrasada/)).toBeTruthy();
-    expect(screen.getByText(/Toque para agendar/)).toBeTruthy();
+    expect(screen.getByText('Agendar revisão atrasada')).toBeTruthy();
   });
 
-  it('quando ha multiplas atrasadas mostra a primeira e e mais N', () => {
+  it('mostra label no plural quando ha multiplas atrasadas', () => {
     render(
       <BannerAtrasada
         recomendacoes={[
-          recomendacao({ titulo: 'Revisão dos 10.000 km', status: 'atrasada' }),
-          recomendacao({ titulo: 'Troca de óleo', status: 'atrasada' }),
-          recomendacao({ titulo: 'Filtro de ar', status: 'atrasada' }),
+          recomendacao({ status: 'atrasada' }),
+          recomendacao({ status: 'atrasada' }),
         ]}
         onPress={onPressMock}
       />
     );
 
-    expect(screen.getByText('Revisão dos 10.000 km e mais 2')).toBeTruthy();
-    expect(screen.getByText(/3 atrasadas/)).toBeTruthy();
+    expect(screen.getByText('Agendar revisões atrasadas')).toBeTruthy();
   });
 
-  it('chama onPress ao tocar no banner', () => {
+  it('chama onPress ao tocar no botao', () => {
     render(
       <BannerAtrasada
-        recomendacoes={[recomendacao({ titulo: 'Revisão', status: 'atrasada' })]}
+        recomendacoes={[recomendacao({ status: 'atrasada' })]}
         onPress={onPressMock}
       />
     );
 
-    fireEvent.press(screen.getByText('Revisão'));
+    fireEvent.press(screen.getByText('Agendar revisão atrasada'));
     expect(onPressMock).toHaveBeenCalledTimes(1);
   });
 });
